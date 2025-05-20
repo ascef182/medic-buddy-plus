@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -14,6 +15,8 @@ const AddPatient: React.FC = () => {
   const [fullName, setFullName] = useState("");
   const [age, setAge] = useState("");
   const [bloodType, setBloodType] = useState("");
+  const [email, setEmail] = useState("");
+  const [createAccount, setCreateAccount] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -33,6 +36,7 @@ const AddPatient: React.FC = () => {
             full_name: fullName,
             age,
             blood_type: bloodType || null,
+            email: createAccount ? email : null,
           },
         ])
         .select()
@@ -40,13 +44,31 @@ const AddPatient: React.FC = () => {
 
       if (error) throw error;
 
-      toast.success(`Paciente ${fullName} adicionado com sucesso!`);
+      if (createAccount && email) {
+        // Update the patient to trigger account creation
+        const { error: updateError } = await supabase
+          .from("patients")
+          .update({ email: email })
+          .eq("id", data.id);
+          
+        if (updateError) throw updateError;
+        
+        toast.success(`Paciente ${fullName} adicionado com sucesso e conta de acesso criada!`);
+      } else {
+        toast.success(`Paciente ${fullName} adicionado com sucesso!`);
+      }
+      
       navigate("/pacientes");
     } catch (error: any) {
       toast.error(`Erro ao adicionar paciente: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
   };
 
   return (
@@ -86,6 +108,32 @@ const AddPatient: React.FC = () => {
                   onChange={(e) => setBloodType(e.target.value)}
                 />
               </div>
+              
+              <div className="flex items-center space-x-2 pt-3">
+                <Switch
+                  id="createAccount"
+                  checked={createAccount}
+                  onCheckedChange={setCreateAccount}
+                />
+                <Label htmlFor="createAccount">Criar conta de acesso para o paciente</Label>
+              </div>
+              
+              {createAccount && (
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email do paciente</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required={createAccount}
+                    placeholder="email@exemplo.com"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Um email será enviado ao paciente com as instruções de acesso.
+                  </p>
+                </div>
+              )}
 
               <div className="pt-4 flex gap-3">
                 <Button
@@ -96,7 +144,11 @@ const AddPatient: React.FC = () => {
                 >
                   Cancelar
                 </Button>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading || (createAccount && !validateEmail(email))}
+                >
                   {isLoading ? "Adicionando..." : "Adicionar Paciente"}
                 </Button>
               </div>

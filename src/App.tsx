@@ -20,6 +20,7 @@ import EditPatient from "./pages/EditPatient";
 import Reminders from "./pages/Reminders";
 import InsightsPage from "./pages/InsightsPage";
 import NotFound from "./pages/NotFound";
+import PatientDashboard from "./pages/PatientDashboard"; 
 import { MedicationProvider } from "./context/MedicationContext";
 import { AuthProvider } from "./context/AuthContext";
 import { AppointmentProvider } from "./context/AppointmentContext";
@@ -36,10 +37,12 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<Auth />} />
+              
+              {/* Caregiver routes */}
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <Index />
                   </ProtectedRoute>
                 }
@@ -47,7 +50,7 @@ function App() {
               <Route
                 path="/medicamentos"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <Medications />
                   </ProtectedRoute>
                 }
@@ -55,7 +58,7 @@ function App() {
               <Route
                 path="/medicamentos/adicionar"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <AddMedication />
                   </ProtectedRoute>
                 }
@@ -63,7 +66,7 @@ function App() {
               <Route
                 path="/humor"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <MoodPage />
                   </ProtectedRoute>
                 }
@@ -71,7 +74,7 @@ function App() {
               <Route
                 path="/consultas"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <Appointments />
                   </ProtectedRoute>
                 }
@@ -79,7 +82,7 @@ function App() {
               <Route
                 path="/exames"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <Exams />
                   </ProtectedRoute>
                 }
@@ -87,7 +90,7 @@ function App() {
               <Route
                 path="/eventos"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <Events />
                   </ProtectedRoute>
                 }
@@ -95,7 +98,7 @@ function App() {
               <Route
                 path="/contatos"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <Contacts />
                   </ProtectedRoute>
                 }
@@ -103,7 +106,7 @@ function App() {
               <Route
                 path="/perfil"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <PatientProfile />
                   </ProtectedRoute>
                 }
@@ -111,7 +114,7 @@ function App() {
               <Route
                 path="/pacientes"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <PatientList />
                   </ProtectedRoute>
                 }
@@ -119,7 +122,7 @@ function App() {
               <Route
                 path="/pacientes/adicionar"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <AddPatient />
                   </ProtectedRoute>
                 }
@@ -127,7 +130,7 @@ function App() {
               <Route
                 path="/pacientes/editar/:id"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <EditPatient />
                   </ProtectedRoute>
                 }
@@ -135,7 +138,7 @@ function App() {
               <Route
                 path="/lembretes"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <Reminders />
                   </ProtectedRoute>
                 }
@@ -143,11 +146,22 @@ function App() {
               <Route
                 path="/insights"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute caregiverOnly>
                     <InsightsPage />
                   </ProtectedRoute>
                 }
               />
+              
+              {/* Patient routes */}
+              <Route
+                path="/paciente/dashboard"
+                element={
+                  <ProtectedRoute patientOnly>
+                    <PatientDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster richColors />
