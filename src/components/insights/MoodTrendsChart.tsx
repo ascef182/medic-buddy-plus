@@ -2,8 +2,8 @@
 import { useMemo } from "react";
 import { format, isWithinInterval, subDays, eachDayOfInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { MoodEntry, MoodType } from "@/context/MedicationContext";
 
@@ -152,9 +152,7 @@ const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
                   return "";
                 }}
               />
-              <ChartTooltip>
-                <ChartTooltipContent />
-              </ChartTooltip>
+              <Tooltip content={<ChartTooltipContent />} />
               <Area
                 type="monotone"
                 dataKey="moodValue"

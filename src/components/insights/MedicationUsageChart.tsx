@@ -1,8 +1,8 @@
 
 import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from "recharts";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import { Medication } from "@/context/MedicationContext";
 
 interface MedicationUsageChartProps {
@@ -91,9 +91,7 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
                   <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                 ))}
               </Pie>
-              <ChartTooltip>
-                <ChartTooltipContent />
-              </ChartTooltip>
+              <Tooltip content={<ChartTooltipContent />} />
               <Legend />
             </PieChart>
           </ChartContainer>
