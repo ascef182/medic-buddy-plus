@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 
 const Index = () => {
-  const { medications, patientProfile, selectedPatientId } = useMedication();
+  const { medications, patientProfile, selectedPatientId, setSelectedPatientId } = useMedication();
   const { user } = useAuth();
   const navigate = useNavigate();
   const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
