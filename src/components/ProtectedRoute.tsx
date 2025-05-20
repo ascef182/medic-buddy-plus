@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import Loading from "@/components/Loading";
+import { checkMissedMedications } from "@/utils/automaticAlerts";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -50,6 +51,32 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       };
 
       checkPatients();
+      
+      // Check for missed medications when the app loads
+      const checkAlerts = async () => {
+        try {
+          const missedMedications = await checkMissedMedications();
+          
+          if (missedMedications && missedMedications.length > 0) {
+            toast.warning(
+              `${missedMedications.length} medicamento(s) não tomado(s). Alertas enviados automaticamente.`,
+              { duration: 5000 }
+            );
+          }
+        } catch (error) {
+          console.error("Erro ao verificar alertas de medicamentos:", error);
+        }
+      };
+      
+      // Run once on load
+      checkAlerts();
+      
+      // Set up periodic check every 15 minutes
+      const intervalId = setInterval(checkAlerts, 15 * 60 * 1000);
+      
+      return () => {
+        clearInterval(intervalId);
+      };
     }
   }, [user, navigate]);
 

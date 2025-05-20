@@ -9,6 +9,61 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      medication_alerts: {
+        Row: {
+          alert_contact_id: string | null
+          alert_sent: boolean | null
+          alert_time: string
+          confirmed: boolean | null
+          created_at: string
+          id: string
+          medication_id: string
+          patient_id: string
+        }
+        Insert: {
+          alert_contact_id?: string | null
+          alert_sent?: boolean | null
+          alert_time: string
+          confirmed?: boolean | null
+          created_at?: string
+          id?: string
+          medication_id: string
+          patient_id: string
+        }
+        Update: {
+          alert_contact_id?: string | null
+          alert_sent?: boolean | null
+          alert_time?: string
+          confirmed?: boolean | null
+          created_at?: string
+          id?: string
+          medication_id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_alerts_alert_contact_id_fkey"
+            columns: ["alert_contact_id"]
+            isOneToOne: false
+            referencedRelation: "patient_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_alerts_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "patient_medications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_alerts_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_allergies: {
         Row: {
           allergy: string
@@ -28,6 +83,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "patient_allergies_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_appointments: {
+        Row: {
+          appointment_date: string
+          confirmed: boolean | null
+          created_at: string
+          doctor: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          notification_sent: boolean | null
+          patient_id: string
+          title: string
+        }
+        Insert: {
+          appointment_date: string
+          confirmed?: boolean | null
+          created_at?: string
+          doctor?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          notification_sent?: boolean | null
+          patient_id: string
+          title: string
+        }
+        Update: {
+          appointment_date?: string
+          confirmed?: boolean | null
+          created_at?: string
+          doctor?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          notification_sent?: boolean | null
+          patient_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_appointments_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
@@ -154,8 +256,98 @@ export type Database = {
           },
         ]
       }
+      patient_events: {
+        Row: {
+          confirmed: boolean | null
+          created_at: string
+          description: string | null
+          event_date: string
+          id: string
+          location: string | null
+          notification_sent: boolean | null
+          patient_id: string
+          title: string
+        }
+        Insert: {
+          confirmed?: boolean | null
+          created_at?: string
+          description?: string | null
+          event_date: string
+          id?: string
+          location?: string | null
+          notification_sent?: boolean | null
+          patient_id: string
+          title: string
+        }
+        Update: {
+          confirmed?: boolean | null
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          id?: string
+          location?: string | null
+          notification_sent?: boolean | null
+          patient_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_exams: {
+        Row: {
+          confirmed: boolean | null
+          created_at: string
+          exam_date: string
+          facility: string | null
+          id: string
+          notification_sent: boolean | null
+          patient_id: string
+          results: string | null
+          title: string
+        }
+        Insert: {
+          confirmed?: boolean | null
+          created_at?: string
+          exam_date: string
+          facility?: string | null
+          id?: string
+          notification_sent?: boolean | null
+          patient_id: string
+          results?: string | null
+          title: string
+        }
+        Update: {
+          confirmed?: boolean | null
+          created_at?: string
+          exam_date?: string
+          facility?: string | null
+          id?: string
+          notification_sent?: boolean | null
+          patient_id?: string
+          results?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_exams_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_medications: {
         Row: {
+          alert_threshold: number | null
+          auto_alert_contact_id: string | null
           dosage: string
           frequency: string
           id: string
@@ -169,6 +361,8 @@ export type Database = {
           unit: string
         }
         Insert: {
+          alert_threshold?: number | null
+          auto_alert_contact_id?: string | null
           dosage: string
           frequency: string
           id?: string
@@ -182,6 +376,8 @@ export type Database = {
           unit: string
         }
         Update: {
+          alert_threshold?: number | null
+          auto_alert_contact_id?: string | null
           dosage?: string
           frequency?: string
           id?: string
@@ -195,6 +391,13 @@ export type Database = {
           unit?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "patient_medications_auto_alert_contact_id_fkey"
+            columns: ["auto_alert_contact_id"]
+            isOneToOne: false
+            referencedRelation: "patient_contacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "patient_medications_patient_id_fkey"
             columns: ["patient_id"]

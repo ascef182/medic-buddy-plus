@@ -1,10 +1,10 @@
 
 import React from "react";
-import { format } from "date-fns";
-import { PillBottle, Clock, Check } from "lucide-react";
+import { PillBottle, Clock, Check, Bell } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Medication, useMedication } from "@/context/MedicationContext";
+import MedicationAlertSettings from "@/components/MedicationAlertSettings";
 
 interface MedicationCardProps {
   medication: Medication;
@@ -48,7 +48,14 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
           </div>
         </div>
 
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex justify-between">
+          <MedicationAlertSettings 
+            medicationId={id} 
+            medicationName={name}
+            alertThreshold={medication.alert_threshold}
+            autoAlertContactId={medication.auto_alert_contact_id}
+          />
+          
           <Button
             variant={isTakenToday ? "outline" : "default"}
             size="sm"
