@@ -256,51 +256,6 @@ export type Database = {
           },
         ]
       }
-      patient_emergency_signals: {
-        Row: {
-          created_at: string
-          id: string
-          location: string | null
-          message: string | null
-          patient_id: string
-          resolved: boolean | null
-          resolved_at: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          location?: string | null
-          message?: string | null
-          patient_id: string
-          resolved?: boolean | null
-          resolved_at?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          location?: string | null
-          message?: string | null
-          patient_id?: string
-          resolved?: boolean | null
-          resolved_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "patient_emergency_signals_patient_id_fkey"
-            columns: ["patient_id"]
-            isOneToOne: false
-            referencedRelation: "patients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "patient_emergency_signals_patient_id_fkey1"
-            columns: ["patient_id"]
-            isOneToOne: false
-            referencedRelation: "patients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       patient_events: {
         Row: {
           confirmed: boolean | null
@@ -516,10 +471,8 @@ export type Database = {
           blood_type: string | null
           caregiver_id: string
           created_at: string
-          email: string | null
           full_name: string
           id: string
-          password: boolean | null
           updated_at: string
         }
         Insert: {
@@ -527,10 +480,8 @@ export type Database = {
           blood_type?: string | null
           caregiver_id: string
           created_at?: string
-          email?: string | null
           full_name: string
           id?: string
-          password?: boolean | null
           updated_at?: string
         }
         Update: {
@@ -538,10 +489,8 @@ export type Database = {
           blood_type?: string | null
           caregiver_id?: string
           created_at?: string
-          email?: string | null
           full_name?: string
           id?: string
-          password?: boolean | null
           updated_at?: string
         }
         Relationships: [

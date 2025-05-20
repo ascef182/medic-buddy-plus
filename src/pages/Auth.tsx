@@ -30,16 +30,8 @@ const Auth: React.FC = () => {
 
         if (error) throw error;
         
-        // Verificar se é um paciente ou cuidador baseado nos metadados
-        const isPatient = data.user?.user_metadata?.patient_id;
-        
-        if (isPatient) {
-          toast.success("Login realizado como paciente!");
-          navigate("/paciente/dashboard");
-        } else {
-          toast.success("Login realizado como cuidador!");
-          navigate("/dashboard");
-        }
+        toast.success("Login realizado com sucesso!");
+        navigate("/dashboard");
       } else {
         // Sign up
         const { data, error } = await supabase.auth.signUp({

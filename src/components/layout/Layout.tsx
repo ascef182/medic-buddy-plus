@@ -25,7 +25,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedPatientId, setSelectedPatientId } = useMedication();
@@ -43,7 +43,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const menuItems = [
     {
       title: "Início",
-      path: "/dashboard",
+      path: "/",
       icon: <User className="h-5 w-5" />,
     },
     {
@@ -136,7 +136,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </SheetContent>
           </Sheet>
-          <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
+          <Link to="/" className="flex items-center gap-2 font-semibold">
             <User className="h-6 w-6" />
             <span className="hidden md:inline-block">BuddyDoctor</span>
           </Link>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,13 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const PatientProfilePage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { patientProfile, updatePatientProfile, selectedPatientId, setSelectedPatientId, loadPatientData } = useMedication();
-  const queryParams = new URLSearchParams(location.search);
-  const patientIdFromUrl = queryParams.get('id');
-  
-  // Use o ID do URL se fornecido, caso contrário use o ID selecionado
-  const activePatientId = patientIdFromUrl || selectedPatientId;
+  const { patientProfile, updatePatientProfile } = useMedication();
 
   const [profile, setProfile] = useState<PatientProfile>({
     fullName: "",
@@ -47,14 +41,6 @@ const PatientProfilePage = () => {
     phone: "",
   });
 
-  // Selecionar o paciente correto
-  useEffect(() => {
-    if (patientIdFromUrl && patientIdFromUrl !== selectedPatientId) {
-      setSelectedPatientId(patientIdFromUrl);
-      loadPatientData(patientIdFromUrl);
-    }
-  }, [patientIdFromUrl, selectedPatientId, setSelectedPatientId, loadPatientData]);
-
   // Initialize with existing data if available
   useEffect(() => {
     if (patientProfile) {
@@ -65,7 +51,7 @@ const PatientProfilePage = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updatePatientProfile(profile);
-    navigate("/dashboard");
+    navigate("/");
   };
 
   const addAllergy = () => {
@@ -153,14 +139,12 @@ const PatientProfilePage = () => {
       <div className="mb-6">
         <Button
           variant="ghost"
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/")}
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
-        <h1 className="text-2xl font-bold">
-          Ficha Médica: {patientProfile?.fullName || "Paciente"}
-        </h1>
+        <h1 className="text-2xl font-bold">Ficha Médica do Paciente</h1>
         <p className="text-muted-foreground">
           Preencha as informações médicas do paciente
         </p>
