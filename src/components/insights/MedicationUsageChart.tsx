@@ -71,29 +71,31 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
     <div className="space-y-4">
       <Card className="p-4">
         <div className="text-lg font-medium mb-2">Medicamentos por tipo</div>
-        <div className="h-80">
+        <div className="h-[300px] md:h-[400px]">
           <ChartContainer 
             config={config}
             className="h-full"
           >
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                ))}
-              </Pie>
-              <Tooltip content={<ChartTooltipContent />} />
-              <Legend />
-            </PieChart>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                  ))}
+                </Pie>
+                <Tooltip content={<ChartTooltipContent />} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </ChartContainer>
         </div>
       </Card>
@@ -107,8 +109,8 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
             .slice(0, 5)
             .map((medication) => (
               <div key={medication.id} className="flex justify-between items-center p-2 rounded-md bg-muted/50">
-                <div className="font-medium">{medication.name}</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="font-medium truncate mr-2">{medication.name}</div>
+                <div className="text-sm text-muted-foreground whitespace-nowrap">
                   {medication.quantity} {medication.unit}
                 </div>
               </div>

@@ -116,13 +116,24 @@ const InsightsPage = () => {
             <PopoverTrigger asChild>
               <Button variant="outline" className="justify-start">
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateRange.from && dateRange.to ? (
-                  <span>
-                    {format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}
-                  </span>
-                ) : (
-                  <span>Selecione período</span>
-                )}
+                <span className="hidden sm:inline">
+                  {dateRange.from && dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}
+                    </>
+                  ) : (
+                    "Selecione período"
+                  )}
+                </span>
+                <span className="sm:hidden">
+                  {dateRange.from && dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "dd/MM")} - {format(dateRange.to, "dd/MM")}
+                    </>
+                  ) : (
+                    "Período"
+                  )}
+                </span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -136,7 +147,7 @@ const InsightsPage = () => {
                     setTimePeriod("all"); // Custom range
                   }
                 }}
-                numberOfMonths={2}
+                numberOfMonths={1}
                 locale={ptBR}
               />
             </PopoverContent>
@@ -148,17 +159,19 @@ const InsightsPage = () => {
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="medicacoes">
             <ChartBar className="mr-2 h-4 w-4" />
-            Medicações
+            <span className="hidden sm:inline">Medicações</span>
+            <span className="sm:hidden">Med</span>
           </TabsTrigger>
           <TabsTrigger value="humor">
             <ChartLine className="mr-2 h-4 w-4" />
-            Humor
+            <span className="hidden sm:inline">Humor</span>
+            <span className="sm:hidden">Humor</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="medicacoes">
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-2">
               <CardTitle>Uso de Medicamentos</CardTitle>
             </CardHeader>
             <CardContent>
@@ -172,7 +185,7 @@ const InsightsPage = () => {
 
         <TabsContent value="humor">
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-2">
               <CardTitle>Tendências de Humor</CardTitle>
             </CardHeader>
             <CardContent>

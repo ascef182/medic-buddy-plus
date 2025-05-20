@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
@@ -12,6 +12,7 @@ import {
   Menu,
   LogOut,
   Users,
+  ChartBar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -26,6 +27,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { selectedPatientId, setSelectedPatientId } = useMedication();
 
   const handleSignOut = async () => {
@@ -58,6 +60,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       title: "Humor",
       path: "/humor",
       icon: <FileText className="h-5 w-5" />,
+    },
+    {
+      title: "Insights",
+      path: "/insights",
+      icon: <ChartBar className="h-5 w-5" />,
     },
     {
       title: "Contatos",
@@ -107,7 +114,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         onClick={() => setOpen(false)}
                         className={cn(
                           "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                          window.location.pathname === item.path &&
+                          location.pathname === item.path &&
                             "bg-accent text-accent-foreground font-medium"
                         )}
                       >
@@ -154,7 +161,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     to={item.path}
                     className={cn(
                       "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                      window.location.pathname === item.path &&
+                      location.pathname === item.path &&
                         "bg-accent text-accent-foreground font-medium"
                     )}
                   >
