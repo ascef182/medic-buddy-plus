@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/sonner";
-import { ChevronDown, PlusCircle, User, Settings, FileMedical, Pill, Users, HeartPulse } from "lucide-react";
+import { ChevronDown, PlusCircle, User, Settings, Pill, Users, HeartPulse, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useMedication } from "@/context/MedicationContext";
@@ -171,7 +171,7 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
               className="cursor-pointer" 
               onClick={navigateToManagePatient}
             >
-              <FileMedical className="mr-2 h-4 w-4" />
+              <FileText className="mr-2 h-4 w-4" />
               Ficha médica
             </DropdownMenuItem>
             
