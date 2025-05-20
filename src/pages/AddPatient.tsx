@@ -16,6 +16,7 @@ const AddPatient: React.FC = () => {
   const [age, setAge] = useState("");
   const [bloodType, setBloodType] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [createAccount, setCreateAccount] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
@@ -37,6 +38,7 @@ const AddPatient: React.FC = () => {
             age,
             blood_type: bloodType || null,
             email: createAccount ? email : null,
+            password: createAccount // Indica que uma conta deve ser criada
           },
         ])
         .select()
@@ -45,10 +47,13 @@ const AddPatient: React.FC = () => {
       if (error) throw error;
 
       if (createAccount && email) {
-        // Update the patient to trigger account creation
+        // Se escolheu criar conta, enviamos uma atualização especial para acionar o trigger
         const { error: updateError } = await supabase
           .from("patients")
-          .update({ email: email })
+          .update({ 
+            email: email, 
+            password: true  // Sinal para o trigger criar a conta
+          })
           .eq("id", data.id);
           
         if (updateError) throw updateError;
@@ -58,6 +63,8 @@ const AddPatient: React.FC = () => {
         toast.success(`Paciente ${fullName} adicionado com sucesso!`);
       }
       
+      // Vamos definir este paciente como o selecionado
+      localStorage.setItem("selectedPatientId", data.id);
       navigate("/pacientes");
     } catch (error: any) {
       toast.error(`Erro ao adicionar paciente: ${error.message}`);
@@ -119,20 +126,35 @@ const AddPatient: React.FC = () => {
               </div>
               
               {createAccount && (
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email do paciente</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required={createAccount}
-                    placeholder="email@exemplo.com"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Um email será enviado ao paciente com as instruções de acesso.
-                  </p>
-                </div>
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email do paciente</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required={createAccount}
+                      placeholder="email@exemplo.com"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Senha inicial</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required={createAccount}
+                      placeholder="Senha para o paciente"
+                      minLength={6}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Um email será enviado ao paciente com as instruções de acesso.
+                    </p>
+                  </div>
+                </>
               )}
 
               <div className="pt-4 flex gap-3">
@@ -147,7 +169,7 @@ const AddPatient: React.FC = () => {
                 <Button 
                   type="submit" 
                   className="w-full" 
-                  disabled={isLoading || (createAccount && !validateEmail(email))}
+                  disabled={isLoading || (createAccount && (!validateEmail(email) || password.length < 6))}
                 >
                   {isLoading ? "Adicionando..." : "Adicionar Paciente"}
                 </Button>

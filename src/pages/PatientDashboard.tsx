@@ -20,39 +20,44 @@ const PatientDashboard: React.FC = () => {
   const patientId = user?.user_metadata?.patient_id;
   const patientName = user?.user_metadata?.full_name;
   
-  useEffect(() => {
+  const fetchPatientData = async () => {
     if (!patientId) return;
     
-    const fetchPatientData = async () => {
-      try {
-        // Fetch patient medications
-        const { data: medsData, error: medsError } = await supabase
-          .from("patient_medications")
-          .select("*")
-          .eq("patient_id", patientId);
-          
-        if (medsError) throw medsError;
+    try {
+      // Fetch patient medications
+      const { data: medsData, error: medsError } = await supabase
+        .from("patient_medications")
+        .select("*")
+        .eq("patient_id", patientId);
         
-        setMedications(medsData || []);
+      if (medsError) throw medsError;
+      
+      setMedications(medsData || []);
+      
+      // Fetch emergency contacts
+      const { data: contactsData, error: contactsError } = await supabase
+        .from("patient_contacts")
+        .select("*")
+        .eq("patient_id", patientId);
         
-        // Fetch emergency contacts
-        const { data: contactsData, error: contactsError } = await supabase
-          .from("patient_contacts")
-          .select("*")
-          .eq("patient_id", patientId);
-          
-        if (contactsError) throw contactsError;
-        
-        setEmergencyContacts(contactsData || []);
-      } catch (error: any) {
-        toast.error(`Erro ao carregar dados: ${error.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
+      if (contactsError) throw contactsError;
+      
+      setEmergencyContacts(contactsData || []);
+    } catch (error: any) {
+      toast.error(`Erro ao carregar dados: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
     fetchPatientData();
   }, [patientId]);
+  
+  const handleMedicationTaken = () => {
+    // Recarregar os dados do medicamento
+    fetchPatientData();
+  };
   
   const handleEmergencySignal = async () => {
     if (!patientId) return;
@@ -158,6 +163,7 @@ const PatientDashboard: React.FC = () => {
                             <MedicationTakeButton 
                               medication={med}
                               patientId={patientId}
+                              onMedicationTaken={handleMedicationTaken}
                             />
                           </div>
                         </CardContent>

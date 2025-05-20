@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/sonner";
-import { ChevronDown, PlusCircle, User } from "lucide-react";
+import { ChevronDown, PlusCircle, User, Settings, FileMedical, Pill, Users, HeartPulse } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useMedication } from "@/context/MedicationContext";
@@ -34,6 +34,7 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const { user } = useAuth();
   const { setSelectedPatientId, loadPatientData } = useMedication();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) return;
@@ -64,11 +65,16 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
               loadPatientData(data[0].id);
             }
           } else if (data.length > 0) {
-            // No selected ID but we have patients, select the first one
-            setSelectedPatient(data[0]);
-            onPatientSelect(data[0].id);
-            setSelectedPatientId(data[0].id);
-            loadPatientData(data[0].id);
+            // No selected ID but we have patients, select the first one or from localStorage
+            const storedPatientId = localStorage.getItem("selectedPatientId");
+            const patientToSelect = storedPatientId ? 
+              data.find(p => p.id === storedPatientId) || data[0] : 
+              data[0];
+              
+            setSelectedPatient(patientToSelect);
+            onPatientSelect(patientToSelect.id);
+            setSelectedPatientId(patientToSelect.id);
+            loadPatientData(patientToSelect.id);
           }
         }
       } catch (error: any) {
@@ -79,7 +85,7 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
     };
 
     fetchPatients();
-  }, [user, selectedPatientId, onPatientSelect, setSelectedPatientId, loadPatientData]);
+  }, [user, selectedPatientId, onPatientSelect, setSelectedPatientId, loadPatientData, navigate]);
 
   const handlePatientSelect = (patient: Patient) => {
     setSelectedPatient(patient);
@@ -88,6 +94,30 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
     localStorage.setItem("selectedPatientId", patient.id);
     loadPatientData(patient.id);
     toast.success(`Paciente ${patient.full_name} selecionado com sucesso!`);
+  };
+
+  const navigateToManagePatient = () => {
+    if (!selectedPatient) return;
+    
+    navigate(`/perfil?id=${selectedPatient.id}`);
+  };
+
+  const navigateToMedications = () => {
+    if (!selectedPatient) return;
+    
+    navigate(`/medicamentos`);
+  };
+  
+  const navigateToContacts = () => {
+    if (!selectedPatient) return;
+    
+    navigate(`/contatos`);
+  };
+  
+  const navigateToMood = () => {
+    if (!selectedPatient) return;
+    
+    navigate(`/humor`);
   };
 
   if (loading) {
@@ -132,12 +162,54 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
             </span>
           </DropdownMenuItem>
         ))}
+        
         <DropdownMenuSeparator />
+        
+        {selectedPatient && (
+          <>
+            <DropdownMenuItem 
+              className="cursor-pointer" 
+              onClick={navigateToManagePatient}
+            >
+              <FileMedical className="mr-2 h-4 w-4" />
+              Ficha médica
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              className="cursor-pointer" 
+              onClick={navigateToMedications}
+            >
+              <Pill className="mr-2 h-4 w-4" />
+              Gerenciar medicamentos
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              className="cursor-pointer" 
+              onClick={navigateToContacts}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Contatos de emergência
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              className="cursor-pointer" 
+              onClick={navigateToMood}
+            >
+              <HeartPulse className="mr-2 h-4 w-4" />
+              Registro de humor
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+          </>
+        )}
+        
         <Link to="/pacientes" className="w-full">
           <DropdownMenuItem className="cursor-pointer">
+            <Settings className="mr-2 h-4 w-4" />
             Gerenciar pacientes
           </DropdownMenuItem>
         </Link>
+        
         <Link to="/pacientes/adicionar" className="w-full">
           <DropdownMenuItem className="cursor-pointer">
             <PlusCircle className="mr-2 h-4 w-4" />

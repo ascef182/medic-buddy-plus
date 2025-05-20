@@ -16,14 +16,20 @@ interface Medication {
 interface MedicationTakeButtonProps {
   medication: Medication;
   patientId: string;
+  onMedicationTaken?: () => void;
 }
 
-const MedicationTakeButton: React.FC<MedicationTakeButtonProps> = ({ medication, patientId }) => {
+const MedicationTakeButton: React.FC<MedicationTakeButtonProps> = ({ 
+  medication, 
+  patientId,
+  onMedicationTaken
+}) => {
   const [isLoading, setIsLoading] = useState(false);
-  
-  const isTakenToday = medication.last_taken
-    ? new Date(medication.last_taken).toDateString() === new Date().toDateString()
-    : false;
+  const [isTaken, setIsTaken] = useState(
+    medication.last_taken
+      ? new Date(medication.last_taken).toDateString() === new Date().toDateString()
+      : false
+  );
     
   const handleTakeMedication = async () => {
     if (!patientId || !medication.id) return;
@@ -49,6 +55,12 @@ const MedicationTakeButton: React.FC<MedicationTakeButtonProps> = ({ medication,
       // Update local state to reflect changes
       medication.quantity = updatedQuantity;
       medication.last_taken = now.toISOString();
+      setIsTaken(true);
+      
+      // Notify parent component
+      if (onMedicationTaken) {
+        onMedicationTaken();
+      }
       
     } catch (error: any) {
       toast.error(`Erro ao registrar medicamento: ${error.message}`);
@@ -59,13 +71,13 @@ const MedicationTakeButton: React.FC<MedicationTakeButtonProps> = ({ medication,
   
   return (
     <Button
-      variant={isTakenToday ? "outline" : "default"}
+      variant={isTaken ? "outline" : "default"}
       size="sm"
-      className={`${isTakenToday ? "bg-muted" : ""}`}
+      className={`${isTaken ? "bg-muted" : ""}`}
       onClick={handleTakeMedication}
-      disabled={isLoading || isTakenToday || medication.quantity <= 0}
+      disabled={isLoading || isTaken || medication.quantity <= 0}
     >
-      {isTakenToday ? (
+      {isTaken ? (
         <span className="flex items-center">
           <Check className="h-4 w-4 mr-1" /> Tomado
         </span>
