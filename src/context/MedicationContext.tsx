@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +16,8 @@ export interface Medication {
   times: string[];
   notes?: string;
   lastTaken?: Date;
+  alert_threshold?: number;
+  auto_alert_contact_id?: string;
 }
 
 export interface MoodEntry {
@@ -123,7 +124,9 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
           frequency: med.frequency,
           times: med.times,
           notes: med.notes,
-          lastTaken: med.last_taken ? new Date(med.last_taken) : undefined
+          lastTaken: med.last_taken ? new Date(med.last_taken) : undefined,
+          alert_threshold: med.alert_threshold,
+          auto_alert_contact_id: med.auto_alert_contact_id
         })));
       }
 
@@ -713,7 +716,7 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
   );
 };
 
-export const useMedication = () => {
+export const useMedication = (): MedicationContextType => {
   const context = useContext(MedicationContext);
   if (context === undefined) {
     throw new Error("useMedication must be used within a MedicationProvider");
