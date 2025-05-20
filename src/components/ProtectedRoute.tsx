@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Se o usuário está autenticado, mas está na raiz "/", redirecione para "/dashboard"
+  // If the user is authenticated, but is on the landing page ("/"), redirect to "/dashboard"
   if (location.pathname === "/") {
     return <Navigate to="/dashboard" replace />;
   }

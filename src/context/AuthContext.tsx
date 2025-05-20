@@ -103,12 +103,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       // Create or update user settings to enable 2FA
-      const { error } = await supabase
-        .from('user_settings')
-        .upsert({
-          user_id: user.id,
-          two_factor_enabled: true,
-        });
+      const { error } = await supabase.rpc('set_two_factor_enabled', { 
+        enabled: true 
+      });
       
       if (error) throw error;
       
@@ -127,10 +124,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       // Update user settings to disable 2FA
-      const { error } = await supabase
-        .from('user_settings')
-        .update({ two_factor_enabled: false })
-        .eq('user_id', user.id);
+      const { error } = await supabase.rpc('set_two_factor_enabled', { 
+        enabled: false 
+      });
       
       if (error) throw error;
       

@@ -72,13 +72,9 @@ const Auth: React.FC = () => {
         if (error) throw error;
         
         // Check if 2FA is enabled for this user
-        const { data: userData } = await supabase
-          .from('user_settings')
-          .select('two_factor_enabled')
-          .eq('user_id', data.user?.id)
-          .single();
+        const { data: twoFactorEnabled } = await supabase.rpc('is_two_factor_enabled');
         
-        if (userData?.two_factor_enabled) {
+        if (twoFactorEnabled) {
           // Send OTP email
           const { error: otpError } = await supabase.auth.signInWithOtp({
             email,
