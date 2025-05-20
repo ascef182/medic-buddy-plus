@@ -146,13 +146,14 @@ const InsightsPage = () => {
         </div>
       </div>
 
+      {/* Change tabs layout to vertical on mobile */}
       <Tabs defaultValue="medicacoes" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="medicacoes" className="text-sm">
+        <TabsList className="flex flex-col sm:grid sm:grid-cols-2 mb-4 w-full">
+          <TabsTrigger value="medicacoes" className="text-sm justify-start">
             <ChartBar className="mr-2 h-4 w-4" />
             Medicações
           </TabsTrigger>
-          <TabsTrigger value="humor" className="text-sm">
+          <TabsTrigger value="humor" className="text-sm justify-start">
             <ChartLine className="mr-2 h-4 w-4" />
             Humor
           </TabsTrigger>

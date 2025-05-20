@@ -84,7 +84,8 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
     <div className="space-y-4">
       <Card className="p-4">
         <div className="text-lg font-medium mb-2">Medicamentos por tipo</div>
-        <div className="h-[220px] sm:h-[300px]">
+        {/* Reduce chart height on mobile */}
+        <div className="h-[180px] sm:h-[220px]">
           <ChartContainer 
             config={config}
             className="h-full"
@@ -97,7 +98,7 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => `${name}`}
-                  outerRadius={80}
+                  outerRadius={60}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -121,9 +122,9 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
             .sort((a, b) => (b.quantity || 0) - (a.quantity || 0))
             .slice(0, 5)
             .map((medication) => (
-              <div key={medication.id} className="flex justify-between items-center p-2 rounded-md bg-muted/50">
-                <div className="font-medium truncate mr-2">{medication.name}</div>
-                <div className="text-sm text-muted-foreground whitespace-nowrap">
+              <div key={medication.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 rounded-md bg-muted/50">
+                <div className="font-medium truncate">{medication.name}</div>
+                <div className="text-sm text-muted-foreground mt-1 sm:mt-0">
                   {medication.quantity} {medication.unit}
                 </div>
               </div>
