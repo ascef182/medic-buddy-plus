@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Filter, CalendarIcon, ChartBar, ChartLine } from "lucide-react";
@@ -146,27 +145,27 @@ const InsightsPage = () => {
         </div>
       </div>
 
-      {/* Change tabs layout to vertical on mobile */}
-      <Tabs defaultValue="medicacoes" className="w-full">
+      {/* Garantir que os tabs fiquem um abaixo do outro em dispositivos móveis */}
+      <Tabs defaultValue="medicacoes" className="w-full max-w-full">
         <TabsList className="flex flex-col sm:grid sm:grid-cols-2 mb-4 w-full">
-          <TabsTrigger value="medicacoes" className="text-sm justify-start">
+          <TabsTrigger value="medicacoes" className="text-sm justify-start w-full">
             <ChartBar className="mr-2 h-4 w-4" />
             Medicações
           </TabsTrigger>
-          <TabsTrigger value="humor" className="text-sm justify-start">
+          <TabsTrigger value="humor" className="text-sm justify-start w-full">
             <ChartLine className="mr-2 h-4 w-4" />
             Humor
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="medicacoes">
+        <TabsContent value="medicacoes" className="max-w-full overflow-x-hidden">
           <MedicationUsageChart 
             medications={filteredMedications}
             dateRange={dateRange}
           />
         </TabsContent>
 
-        <TabsContent value="humor">
+        <TabsContent value="humor" className="max-w-full overflow-x-hidden">
           <MoodTrendsChart 
             moodEntries={filteredMoodEntries}
             dateRange={dateRange}

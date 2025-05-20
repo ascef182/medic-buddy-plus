@@ -185,30 +185,33 @@ const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
     <div className="space-y-4">
       <Card className="p-4">
         <div className="text-lg font-medium mb-2">Tendência de Humor</div>
-        <div className="h-80">
+        {/* Reduzir altura do gráfico para dispositivos móveis */}
+        <div className="h-[180px] sm:h-[220px]">
           <ChartContainer config={config} className="h-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={chartData}
-                margin={{ top: 20, right: 10, left: 0, bottom: 20 }}
+                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="formattedDate" 
-                  tick={{ fontSize: 10 }}
-                  tickMargin={10}
+                  tick={{ fontSize: 8 }}
+                  tickMargin={5}
                   interval="preserveStartEnd"
+                  tickFormatter={(value) => value.split('/')[0]} // Mostrar apenas o dia
                 />
                 <YAxis 
                   domain={[0, 9]}
                   ticks={[1, 3, 5, 8]}
                   tickFormatter={(value) => {
-                    if (value === 1) return "Deprimido";
-                    if (value === 3) return "Triste";
-                    if (value === 5) return "Neutro";
-                    if (value === 8) return "Feliz";
+                    if (value === 1) return "Dep";
+                    if (value === 3) return "Tris";
+                    if (value === 5) return "Neu";
+                    if (value === 8) return "Fel";
                     return "";
                   }}
+                  width={30}
                 />
                 <Tooltip content={customTooltip} />
                 <Area
@@ -230,14 +233,14 @@ const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
         </div>
       </Card>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {moodStats.sort((a, b) => b.count - a.count).slice(0, 8).map((stat) => (
           <Card key={stat.mood}>
             <CardContent className="p-3 flex flex-col items-center">
-              <div className="text-2xl sm:text-3xl mb-1">
+              <div className="text-2xl mb-1">
                 {MOOD_EMOJIS[stat.mood]}
               </div>
-              <div className="text-sm sm:text-base font-medium">{MOOD_LABELS[stat.mood]}</div>
+              <div className="text-xs font-medium">{MOOD_LABELS[stat.mood]}</div>
               <div className="text-xs text-muted-foreground">
                 {stat.count} ({stat.percentage.toFixed(0)}%)
               </div>
