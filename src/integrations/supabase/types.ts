@@ -9,7 +9,321 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      patient_allergies: {
+        Row: {
+          allergy: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          allergy: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          allergy?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_allergies_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_chronic_diseases: {
+        Row: {
+          disease: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          disease: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          disease?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_chronic_diseases_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_contacts: {
+        Row: {
+          email: string | null
+          id: string
+          name: string
+          patient_id: string
+          phone: string | null
+          relation: string
+        }
+        Insert: {
+          email?: string | null
+          id?: string
+          name: string
+          patient_id: string
+          phone?: string | null
+          relation: string
+        }
+        Update: {
+          email?: string | null
+          id?: string
+          name?: string
+          patient_id?: string
+          phone?: string | null
+          relation?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_contacts_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_diagnoses: {
+        Row: {
+          diagnosis: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          diagnosis: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          diagnosis?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_diagnoses_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_doctors: {
+        Row: {
+          id: string
+          name: string
+          patient_id: string
+          phone: string | null
+          specialty: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          patient_id: string
+          phone?: string | null
+          specialty?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          patient_id?: string
+          phone?: string | null
+          specialty?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_doctors_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_medications: {
+        Row: {
+          dosage: string
+          frequency: string
+          id: string
+          last_taken: string | null
+          name: string
+          notes: string | null
+          patient_id: string
+          quantity: number
+          times: string[]
+          type: string
+          unit: string
+        }
+        Insert: {
+          dosage: string
+          frequency: string
+          id?: string
+          last_taken?: string | null
+          name: string
+          notes?: string | null
+          patient_id: string
+          quantity: number
+          times: string[]
+          type: string
+          unit: string
+        }
+        Update: {
+          dosage?: string
+          frequency?: string
+          id?: string
+          last_taken?: string | null
+          name?: string
+          notes?: string | null
+          patient_id?: string
+          quantity?: number
+          times?: string[]
+          type?: string
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_medications_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_mood_entries: {
+        Row: {
+          date: string
+          id: string
+          mood: string
+          notes: string | null
+          patient_id: string
+        }
+        Insert: {
+          date?: string
+          id?: string
+          mood: string
+          notes?: string | null
+          patient_id: string
+        }
+        Update: {
+          date?: string
+          id?: string
+          mood?: string
+          notes?: string | null
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_mood_entries_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_observations: {
+        Row: {
+          id: string
+          observations: string | null
+          patient_id: string
+        }
+        Insert: {
+          id?: string
+          observations?: string | null
+          patient_id: string
+        }
+        Update: {
+          id?: string
+          observations?: string | null
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_observations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          age: string | null
+          blood_type: string | null
+          caregiver_id: string
+          created_at: string
+          full_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          age?: string | null
+          blood_type?: string | null
+          caregiver_id: string
+          created_at?: string
+          full_name: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          age?: string | null
+          blood_type?: string | null
+          caregiver_id?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patients_caregiver_id_fkey"
+            columns: ["caregiver_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
