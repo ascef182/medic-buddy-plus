@@ -1,5 +1,5 @@
 
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Loading from "@/components/Loading";
 
@@ -9,17 +9,20 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <Loading />;
   }
 
   if (!user) {
+    // Save the attempted URL for redirecting after login
+    sessionStorage.setItem("redirectAfterLogin", location.pathname);
     return <Navigate to="/auth" replace />;
   }
 
   // Se o usuário está autenticado, mas está na raiz "/", redirecione para "/dashboard"
-  if (window.location.pathname === "/") {
+  if (location.pathname === "/") {
     return <Navigate to="/dashboard" replace />;
   }
 

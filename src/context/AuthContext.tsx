@@ -10,6 +10,10 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  updateUser: (data: { email?: string; password?: string; data?: Record<string, any> }) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  enableTwoFactor: () => Promise<void>;
+  disableTwoFactor: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +22,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Set up auth state listener
@@ -29,6 +34,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           toast.info('Logout realizado com sucesso!');
           // Clear localStorage patient selection on logout
           localStorage.removeItem("selectedPatientId");
+        } else if (event === 'PASSWORD_RECOVERY') {
+          // Redirect to password reset form
+          navigate('/auth/reset-password');
+        } else if (event === 'USER_UPDATED') {
+          toast.success('Informações do usuário atualizadas com sucesso!');
         }
         
         setSession(session);
@@ -45,7 +55,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const signOut = async () => {
     try {
@@ -57,11 +67,89 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const updateUser = async (data: { email?: string; password?: string; data?: Record<string, any> }) => {
+    try {
+      const { error } = await supabase.auth.updateUser(data);
+      
+      if (error) throw error;
+      
+      toast.success('Informações atualizadas com sucesso!');
+    } catch (error: any) {
+      toast.error(`Erro ao atualizar informações: ${error.message}`);
+      throw error;
+    }
+  };
+
+  const requestPasswordReset = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Instruções de redefinição de senha enviadas para seu email.');
+    } catch (error: any) {
+      toast.error(`Erro ao solicitar redefinição de senha: ${error.message}`);
+      throw error;
+    }
+  };
+
+  const enableTwoFactor = async () => {
+    if (!user) {
+      toast.error('Você precisa estar logado para ativar a autenticação de dois fatores.');
+      return;
+    }
+    
+    try {
+      // Create or update user settings to enable 2FA
+      const { error } = await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
+          two_factor_enabled: true,
+        });
+      
+      if (error) throw error;
+      
+      toast.success('Autenticação de dois fatores ativada com sucesso!');
+    } catch (error: any) {
+      toast.error(`Erro ao ativar autenticação de dois fatores: ${error.message}`);
+      throw error;
+    }
+  };
+
+  const disableTwoFactor = async () => {
+    if (!user) {
+      toast.error('Você precisa estar logado para desativar a autenticação de dois fatores.');
+      return;
+    }
+    
+    try {
+      // Update user settings to disable 2FA
+      const { error } = await supabase
+        .from('user_settings')
+        .update({ two_factor_enabled: false })
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      toast.success('Autenticação de dois fatores desativada com sucesso!');
+    } catch (error: any) {
+      toast.error(`Erro ao desativar autenticação de dois fatores: ${error.message}`);
+      throw error;
+    }
+  };
+
   const value = {
     session,
     user,
     loading,
     signOut,
+    updateUser,
+    requestPasswordReset,
+    enableTwoFactor,
+    disableTwoFactor,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

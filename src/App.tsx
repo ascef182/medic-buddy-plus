@@ -36,6 +36,7 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/reset-password" element={<Auth />} />
               <Route
                 path="/dashboard"
                 element={
