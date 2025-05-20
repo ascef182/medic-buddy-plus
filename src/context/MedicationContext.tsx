@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -32,6 +31,21 @@ export interface Contact {
   relation: string;
 }
 
+export interface PatientProfile {
+  fullName: string;
+  age: string;
+  bloodType: string;
+  allergies: string[];
+  chronicDiseases: string[];
+  recentDiagnosis: string[];
+  doctors: {
+    name: string;
+    specialty: string;
+    phone: string;
+  }[];
+  observations: string;
+}
+
 interface MedicationContextType {
   medications: Medication[];
   addMedication: (medication: Omit<Medication, "id">) => void;
@@ -44,14 +58,29 @@ interface MedicationContextType {
   addContact: (contact: Omit<Contact, "id">) => void;
   updateContact: (id: string, contact: Partial<Contact>) => void;
   deleteContact: (id: string) => void;
+  patientProfile: PatientProfile | null;
+  updatePatientProfile: (profile: PatientProfile) => void;
 }
 
 const MedicationContext = createContext<MedicationContextType | undefined>(undefined);
+
+// Default patient profile
+const defaultPatientProfile: PatientProfile = {
+  fullName: "",
+  age: "",
+  bloodType: "",
+  allergies: [],
+  chronicDiseases: [],
+  recentDiagnosis: [],
+  doctors: [],
+  observations: "",
+};
 
 export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [medications, setMedications] = useState<Medication[]>([]);
   const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [patientProfile, setPatientProfile] = useState<PatientProfile | null>(defaultPatientProfile);
   const { toast } = useToast();
 
   const addMedication = (medication: Omit<Medication, "id">) => {
@@ -160,6 +189,14 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
     });
   };
 
+  const updatePatientProfile = (profile: PatientProfile) => {
+    setPatientProfile(profile);
+    toast({
+      title: "Perfil atualizado",
+      description: "Os dados do paciente foram atualizados com sucesso.",
+    });
+  };
+
   return (
     <MedicationContext.Provider
       value={{
@@ -174,6 +211,8 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
         addContact,
         updateContact,
         deleteContact,
+        patientProfile,
+        updatePatientProfile,
       }}
     >
       {children}

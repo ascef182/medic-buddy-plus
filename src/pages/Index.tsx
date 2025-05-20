@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PlusCircle, Clock } from "lucide-react";
+import { PlusCircle, Clock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from "@/components/layout/Layout";
@@ -10,7 +10,7 @@ import MoodTracker from "@/components/MoodTracker";
 import { useMedication } from "@/context/MedicationContext";
 
 const Index = () => {
-  const { medications } = useMedication();
+  const { medications, patientProfile } = useMedication();
   const navigate = useNavigate();
   const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const currentDate = new Date().toLocaleDateString('pt-BR', { 
@@ -24,7 +24,9 @@ const Index = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-bold">Olá!</h2>
+            <h2 className="text-3xl font-bold">
+              {patientProfile?.fullName ? `Olá, ${patientProfile.fullName.split(' ')[0]}!` : 'Olá!'}
+            </h2>
             <p className="text-muted-foreground">
               <span className="capitalize">{currentDate}</span>
             </p>
@@ -89,6 +91,15 @@ const Index = () => {
         >
           <PlusCircle className="h-6 w-6 mb-2" />
           <span>Gerenciar Contatos</span>
+        </Button>
+
+        <Button
+          variant={patientProfile?.fullName ? "outline" : "default"}
+          className="h-24 flex flex-col items-center justify-center"
+          onClick={() => navigate("/perfil")}
+        >
+          <User className="h-6 w-6 mb-2" />
+          <span>{patientProfile?.fullName ? "Editar Ficha Médica" : "Criar Ficha Médica"}</span>
         </Button>
       </div>
     </Layout>

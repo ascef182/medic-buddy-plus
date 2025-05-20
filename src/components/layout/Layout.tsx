@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, PillBottle, Bell, Smile, User } from "lucide-react";
+import { Home, PillBottle, Bell, Smile, User, ClipboardList } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -65,6 +65,17 @@ const Layout = ({ children }: LayoutProps) => {
           >
             <Smile size={24} />
             <span className="text-xs mt-1">Humor</span>
+          </NavLink>
+          <NavLink
+            to="/perfil"
+            className={({ isActive }) =>
+              `flex flex-col items-center p-3 flex-1 ${
+                isActive ? "text-primary" : "text-gray-500"
+              }`
+            }
+          >
+            <ClipboardList size={24} />
+            <span className="text-xs mt-1">Ficha Médica</span>
           </NavLink>
           <NavLink
             to="/contatos"

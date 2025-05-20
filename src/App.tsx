@@ -12,6 +12,7 @@ import AddMedication from "./pages/AddMedication";
 import Reminders from "./pages/Reminders";
 import MoodPage from "./pages/MoodPage";
 import Contacts from "./pages/Contacts";
+import PatientProfile from "./pages/PatientProfile";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/lembretes" element={<Reminders />} />
             <Route path="/humor" element={<MoodPage />} />
             <Route path="/contatos" element={<Contacts />} />
+            <Route path="/perfil" element={<PatientProfile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
