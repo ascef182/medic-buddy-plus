@@ -33,7 +33,7 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
   const [loading, setLoading] = useState(true);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const { user } = useAuth();
-  const { setSelectedPatientId, loadPatientData } = useMedication();
+  const { loadPatientData } = useMedication();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,7 +61,7 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
               // If selected ID doesn't exist but we have patients, select the first one
               setSelectedPatient(data[0]);
               onPatientSelect(data[0].id);
-              setSelectedPatientId(data[0].id);
+              localStorage.setItem("selectedPatientId", data[0].id);
               loadPatientData(data[0].id);
             }
           } else if (data.length > 0) {
@@ -73,7 +73,7 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
               
             setSelectedPatient(patientToSelect);
             onPatientSelect(patientToSelect.id);
-            setSelectedPatientId(patientToSelect.id);
+            localStorage.setItem("selectedPatientId", patientToSelect.id);
             loadPatientData(patientToSelect.id);
           }
         }
@@ -85,12 +85,11 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
     };
 
     fetchPatients();
-  }, [user, selectedPatientId, onPatientSelect, setSelectedPatientId, loadPatientData, navigate]);
+  }, [user, selectedPatientId, onPatientSelect, loadPatientData, navigate]);
 
   const handlePatientSelect = (patient: Patient) => {
     setSelectedPatient(patient);
     onPatientSelect(patient.id);
-    setSelectedPatientId(patient.id);
     localStorage.setItem("selectedPatientId", patient.id);
     loadPatientData(patient.id);
     toast.success(`Paciente ${patient.full_name} selecionado com sucesso!`);

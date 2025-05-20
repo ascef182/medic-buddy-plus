@@ -57,40 +57,56 @@ const Index = () => {
         if (patientsData && patientsData.length > 0) {
           setPatients(patientsData);
           
-          // Get all medications for all patients
-          const patientIds = patientsData.map(patient => patient.id);
-          
-          const { data: medsData, error: medsError } = await supabase
-            .from("patient_medications")
-            .select("*, patients!inner(full_name)")
-            .in("patient_id", patientIds)
-            .order("name");
+          // Get medications for each patient individually
+          const allMedications = [];
+          for (const patient of patientsData) {
+            const { data: medsData, error: medsError } = await supabase
+              .from("patient_medications")
+              .select("*, patient_id")
+              .eq("patient_id", patient.id)
+              .order("name");
+              
+            if (medsError) {
+              console.error("Error fetching medications for patient:", medsError);
+              continue;
+            }
             
-          if (medsError) throw medsError;
+            if (medsData) {
+              const medsWithPatientName = medsData.map(med => ({
+                ...med,
+                patient_name: patient.full_name
+              }));
+              allMedications.push(...medsWithPatientName);
+            }
+          }
           
-          setPatientMedications(medsData || []);
+          setPatientMedications(allMedications || []);
           
           // Get latest mood for each patient
-          const moodsPromises = patientIds.map(async (patientId) => {
+          const moodsPromises = patientsData.map(async (patient) => {
             const { data: moodData, error: moodError } = await supabase
               .from("patient_mood_entries")
               .select("*")
-              .eq("patient_id", patientId)
+              .eq("patient_id", patient.id)
               .order("date", { ascending: false })
               .limit(1);
               
-            if (moodError) throw moodError;
+            if (moodError) {
+              console.error("Error fetching mood for patient:", moodError);
+              return { patientId: patient.id, mood: null, patientName: patient.full_name };
+            }
             
             if (moodData && moodData.length > 0) {
               return {
-                patientId,
+                patientId: patient.id,
                 mood: moodData[0].mood,
                 date: moodData[0].date,
-                notes: moodData[0].notes
+                notes: moodData[0].notes,
+                patientName: patient.full_name
               };
             }
             
-            return { patientId, mood: null };
+            return { patientId: patient.id, mood: null, patientName: patient.full_name };
           });
           
           const moodsResults = await Promise.all(moodsPromises);
@@ -194,18 +210,24 @@ const Index = () => {
                             {getPatientMood(patient.id) !== "Não registrado" ? (
                               <div className="flex items-center">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
-                                  getPatientMood(patient.id) === "Feliz" ? "bg-green-100 text-green-800" :
-                                  getPatientMood(patient.id) === "Neutro" ? "bg-blue-100 text-blue-800" :
-                                  getPatientMood(patient.id) === "Triste" ? "bg-amber-100 text-amber-800" :
-                                  getPatientMood(patient.id) === "Irritado" ? "bg-red-100 text-red-800" :
+                                  getPatientMood(patient.id) === "happy" ? "bg-green-100 text-green-800" :
+                                  getPatientMood(patient.id) === "neutral" ? "bg-blue-100 text-blue-800" :
+                                  getPatientMood(patient.id) === "sad" ? "bg-amber-100 text-amber-800" :
+                                  getPatientMood(patient.id) === "tense" ? "bg-red-100 text-red-800" :
                                   "bg-gray-100 text-gray-800"
                                 }`}>
-                                  {getPatientMood(patient.id) === "Feliz" ? "😊" :
-                                   getPatientMood(patient.id) === "Neutro" ? "😐" :
-                                   getPatientMood(patient.id) === "Triste" ? "😔" :
-                                   getPatientMood(patient.id) === "Irritado" ? "😠" : "❓"}
+                                  {getPatientMood(patient.id) === "happy" ? "😊" :
+                                   getPatientMood(patient.id) === "neutral" ? "😐" :
+                                   getPatientMood(patient.id) === "sad" ? "😔" :
+                                   getPatientMood(patient.id) === "tense" ? "😠" : "❓"}
                                 </div>
-                                <span className="font-medium">{getPatientMood(patient.id)}</span>
+                                <span className="font-medium">
+                                  {getPatientMood(patient.id) === "happy" ? "Feliz" :
+                                   getPatientMood(patient.id) === "neutral" ? "Neutro" :
+                                   getPatientMood(patient.id) === "sad" ? "Triste" :
+                                   getPatientMood(patient.id) === "tense" ? "Tenso" :
+                                   getPatientMood(patient.id)}
+                                </span>
                               </div>
                             ) : (
                               <p className="text-sm text-muted-foreground">Humor não registrado</p>
@@ -219,6 +241,7 @@ const Index = () => {
                           size="sm"
                           onClick={() => {
                             localStorage.setItem("selectedPatientId", patient.id);
+                            setSelectedPatientId(patient.id);
                             navigate("/dashboard");
                           }}
                         >

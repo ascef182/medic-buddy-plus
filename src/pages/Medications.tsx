@@ -51,18 +51,29 @@ const Medications = () => {
         if (patientsData && patientsData.length > 0) {
           setPatients(patientsData);
           
-          // Get all medications for all patients
-          const patientIds = patientsData.map(patient => patient.id);
-          
-          const { data: medsData, error: medsError } = await supabase
-            .from("patient_medications")
-            .select("*")
-            .in("patient_id", patientIds)
-            .order("name");
+          // Get medications for each patient individually
+          const allMeds = [];
+          for (const patient of patientsData) {
+            const { data: medsData, error: medsError } = await supabase
+              .from("patient_medications")
+              .select("*")
+              .eq("patient_id", patient.id)
+              .order("name");
+              
+            if (medsError) {
+              console.error("Error fetching medications for patient:", medsError);
+              continue;
+            }
             
-          if (medsError) throw medsError;
-          
-          setAllPatientMedications(medsData || []);
+            if (medsData) {
+              const medsWithPatientName = medsData.map(med => ({
+                ...med,
+                patient_name: patient.full_name
+              }));
+              allMeds.push(...medsWithPatientName);
+            }
+          }
+          setAllPatientMedications(allMeds || []);
         }
       } catch (error: any) {
         toast.error(`Erro ao carregar medicamentos: ${error.message}`);
@@ -150,7 +161,7 @@ const Medications = () => {
                           {medication.type} - {medication.dosage}
                         </p>
                         <div className="text-xs text-muted-foreground mt-1">
-                          Paciente: <span className="font-medium">{getPatientName(medication.patient_id)}</span>
+                          Paciente: <span className="font-medium">{medication.patient_name || getPatientName(medication.patient_id)}</span>
                         </div>
                         <div className="flex items-center mt-2 text-sm text-muted-foreground">
                           <Clock className="h-3 w-3 mr-1" />
