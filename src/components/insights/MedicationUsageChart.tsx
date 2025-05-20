@@ -1,7 +1,7 @@
 
 import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import { Medication } from "@/context/MedicationContext";
 
@@ -67,11 +67,24 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
     secondary: { label: "Quantidade", color: "#8b5cf6" }, // violet-500
   };
 
+  const customTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-background border rounded-md p-2 shadow-md">
+          <p className="text-sm font-medium">{data.name}</p>
+          <p className="text-sm">{data.value} medicamentos</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-4">
       <Card className="p-4">
         <div className="text-lg font-medium mb-2">Medicamentos por tipo</div>
-        <div className="h-[300px] md:h-[400px]">
+        <div className="h-[220px] sm:h-[300px]">
           <ChartContainer 
             config={config}
             className="h-full"
@@ -83,8 +96,8 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                  outerRadius={80}
+                  label={({ name, percent }) => `${name}`}
+                  outerRadius={({ cx }) => Math.min(cx * 0.6, 80)}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -92,8 +105,8 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
                     <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                   ))}
                 </Pie>
-                <Tooltip content={<ChartTooltipContent />} />
-                <Legend />
+                <Tooltip content={customTooltip} />
+                <Legend layout="horizontal" verticalAlign="bottom" align="center" />
               </PieChart>
             </ResponsiveContainer>
           </ChartContainer>

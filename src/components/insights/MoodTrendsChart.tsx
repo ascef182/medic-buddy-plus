@@ -2,7 +2,7 @@
 import { useMemo } from "react";
 import { format, isWithinInterval, subDays, eachDayOfInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { MoodEntry, MoodType } from "@/context/MedicationContext";
@@ -15,22 +15,52 @@ interface MoodTrendsChartProps {
   };
 }
 
+// Valores para representação numérica dos humores
 const MOOD_VALUES: Record<MoodType, number> = {
-  happy: 3,
-  neutral: 2,
-  sad: 1,
+  happy: 8,
+  neutral: 5,
+  sad: 3,
+  anxious: 4,
+  afraid: 2,
+  tense: 4,
+  nervous: 3,
+  depressed: 1,
 };
 
+// Rótulos para os tipos de humor
 const MOOD_LABELS: Record<MoodType, string> = {
   happy: "Feliz",
   neutral: "Neutro",
   sad: "Triste",
+  anxious: "Ansioso",
+  afraid: "Medo",
+  tense: "Tenso",
+  nervous: "Nervoso",
+  depressed: "Deprimido",
 };
 
+// Cores para cada tipo de humor
 const MOOD_COLORS: Record<MoodType, string> = {
   happy: "#84cc16", // lime-500
   neutral: "#3b82f6", // blue-500
   sad: "#f43f5e", // rose-500
+  anxious: "#f59e0b", // amber-500
+  afraid: "#f97316", // orange-500
+  tense: "#8b5cf6", // violet-500
+  nervous: "#ef4444", // red-500
+  depressed: "#64748b", // slate-500
+};
+
+// Emoji para cada tipo de humor
+const MOOD_EMOJIS: Record<MoodType, string> = {
+  happy: "😊",
+  neutral: "😐",
+  sad: "😔",
+  anxious: "😰",
+  afraid: "😨",
+  tense: "😖",
+  nervous: "😤",
+  depressed: "😞",
 };
 
 const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
@@ -72,13 +102,16 @@ const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
       const avgMoodValue = totalMoodValue / entriesForDay.length;
       
       // Determinar o humor predominante baseado no valor médio
-      let predominantMood: MoodType;
-      if (avgMoodValue > 2.5) {
-        predominantMood = "happy";
-      } else if (avgMoodValue >= 1.5) {
-        predominantMood = "neutral";
-      } else {
-        predominantMood = "sad";
+      // Encontrar o humor mais próximo com base no valor médio
+      let predominantMood: MoodType = "neutral";
+      let closestDistance = Infinity;
+      
+      for (const [mood, value] of Object.entries(MOOD_VALUES)) {
+        const distance = Math.abs(avgMoodValue - value);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          predominantMood = mood as MoodType;
+        }
       }
       
       return {
@@ -114,6 +147,11 @@ const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
     happy: { label: "Feliz", color: MOOD_COLORS.happy },
     neutral: { label: "Neutro", color: MOOD_COLORS.neutral },
     sad: { label: "Triste", color: MOOD_COLORS.sad },
+    anxious: { label: "Ansioso", color: MOOD_COLORS.anxious },
+    afraid: { label: "Medo", color: MOOD_COLORS.afraid },
+    tense: { label: "Tenso", color: MOOD_COLORS.tense },
+    nervous: { label: "Nervoso", color: MOOD_COLORS.nervous },
+    depressed: { label: "Deprimido", color: MOOD_COLORS.depressed },
   };
 
   // Se não houver dados, mostrar mensagem
@@ -125,70 +163,87 @@ const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
     );
   }
 
+  const customTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-background border rounded-md p-2 shadow-md">
+          <p className="text-sm font-medium">{data.formattedDate}</p>
+          {data.mood && (
+            <div className="flex items-center gap-1 mt-1">
+              <span>{MOOD_EMOJIS[data.mood]}</span>
+              <span className="text-sm">{MOOD_LABELS[data.mood]}</span>
+            </div>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-4">
       <Card className="p-4">
         <div className="text-lg font-medium mb-2">Tendência de Humor</div>
         <div className="h-80">
           <ChartContainer config={config} className="h-full">
-            <AreaChart
-              data={chartData}
-              margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="formattedDate" 
-                tick={{ fontSize: 12 }}
-                tickMargin={10}
-                interval="preserveStartEnd"
-              />
-              <YAxis 
-                domain={[0, 4]}
-                ticks={[1, 2, 3]}
-                tickFormatter={(value) => {
-                  if (value === 1) return "Triste";
-                  if (value === 2) return "Neutro";
-                  if (value === 3) return "Feliz";
-                  return "";
-                }}
-              />
-              <Tooltip content={<ChartTooltipContent />} />
-              <Area
-                type="monotone"
-                dataKey="moodValue"
-                stroke="#3b82f6"
-                fill="url(#colorMood)"
-                connectNulls
-              />
-              <defs>
-                <linearGradient id="colorMood" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                </linearGradient>
-              </defs>
-            </AreaChart>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={chartData}
+                margin={{ top: 20, right: 10, left: 0, bottom: 20 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="formattedDate" 
+                  tick={{ fontSize: 10 }}
+                  tickMargin={10}
+                  interval="preserveStartEnd"
+                />
+                <YAxis 
+                  domain={[0, 9]}
+                  ticks={[1, 3, 5, 8]}
+                  tickFormatter={(value) => {
+                    if (value === 1) return "Deprimido";
+                    if (value === 3) return "Triste";
+                    if (value === 5) return "Neutro";
+                    if (value === 8) return "Feliz";
+                    return "";
+                  }}
+                />
+                <Tooltip content={customTooltip} />
+                <Area
+                  type="monotone"
+                  dataKey="moodValue"
+                  stroke="#3b82f6"
+                  fill="url(#colorMood)"
+                  connectNulls
+                />
+                <defs>
+                  <linearGradient id="colorMood" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+              </AreaChart>
+            </ResponsiveContainer>
           </ChartContainer>
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {(["happy", "neutral", "sad"] as MoodType[]).map((moodType) => {
-          const stat = moodStats.find(s => s.mood === moodType) || { count: 0, percentage: 0 };
-          
-          return (
-            <Card key={moodType}>
-              <CardContent className="p-4 flex flex-col items-center">
-                <div className="text-4xl mb-2">
-                  {moodType === "happy" ? "😊" : moodType === "neutral" ? "😐" : "😔"}
-                </div>
-                <div className="text-lg font-medium">{MOOD_LABELS[moodType]}</div>
-                <div className="text-sm text-muted-foreground">
-                  {stat.count} registros ({stat.percentage.toFixed(0)}%)
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        {moodStats.sort((a, b) => b.count - a.count).slice(0, 8).map((stat) => (
+          <Card key={stat.mood}>
+            <CardContent className="p-3 flex flex-col items-center">
+              <div className="text-2xl sm:text-3xl mb-1">
+                {MOOD_EMOJIS[stat.mood]}
+              </div>
+              <div className="text-sm sm:text-base font-medium">{MOOD_LABELS[stat.mood]}</div>
+              <div className="text-xs text-muted-foreground">
+                {stat.count} ({stat.percentage.toFixed(0)}%)
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

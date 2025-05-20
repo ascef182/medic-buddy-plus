@@ -93,14 +93,14 @@ const InsightsPage = () => {
         <h1 className="text-2xl font-bold">Insights</h1>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6 justify-between">
+      <div className="flex flex-col gap-4 mb-6">
         <div className="flex flex-wrap gap-2">
           {/* Time period filter */}
           <Select
             value={timePeriod}
             onValueChange={(value) => handleTimePeriodChange(value as TimePeriod)}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[140px]">
               <CalendarIcon className="mr-2 h-4 w-4" />
               <SelectValue placeholder="Período" />
             </SelectTrigger>
@@ -114,24 +114,15 @@ const InsightsPage = () => {
           {/* Custom date range picker */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="justify-start">
+              <Button variant="outline" className="justify-start h-10">
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">
+                <span className="text-xs sm:text-sm whitespace-nowrap">
                   {dateRange.from && dateRange.to ? (
                     <>
-                      {format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}
+                      {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} - {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
                     </>
                   ) : (
                     "Selecione período"
-                  )}
-                </span>
-                <span className="sm:hidden">
-                  {dateRange.from && dateRange.to ? (
-                    <>
-                      {format(dateRange.from, "dd/MM")} - {format(dateRange.to, "dd/MM")}
-                    </>
-                  ) : (
-                    "Período"
                   )}
                 </span>
               </Button>
@@ -156,45 +147,29 @@ const InsightsPage = () => {
       </div>
 
       <Tabs defaultValue="medicacoes" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="medicacoes">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsTrigger value="medicacoes" className="text-sm">
             <ChartBar className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Medicações</span>
-            <span className="sm:hidden">Med</span>
+            Medicações
           </TabsTrigger>
-          <TabsTrigger value="humor">
+          <TabsTrigger value="humor" className="text-sm">
             <ChartLine className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Humor</span>
-            <span className="sm:hidden">Humor</span>
+            Humor
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="medicacoes">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Uso de Medicamentos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MedicationUsageChart 
-                medications={filteredMedications}
-                dateRange={dateRange}
-              />
-            </CardContent>
-          </Card>
+          <MedicationUsageChart 
+            medications={filteredMedications}
+            dateRange={dateRange}
+          />
         </TabsContent>
 
         <TabsContent value="humor">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Tendências de Humor</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MoodTrendsChart 
-                moodEntries={filteredMoodEntries}
-                dateRange={dateRange}
-              />
-            </CardContent>
-          </Card>
+          <MoodTrendsChart 
+            moodEntries={filteredMoodEntries}
+            dateRange={dateRange}
+          />
         </TabsContent>
       </Tabs>
     </Layout>

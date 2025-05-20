@@ -3,7 +3,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
-export type MoodType = "happy" | "neutral" | "sad";
+export type MoodType = 
+  | "happy" 
+  | "neutral" 
+  | "sad" 
+  | "anxious"
+  | "afraid"
+  | "tense"
+  | "nervous" 
+  | "depressed";
 
 export interface Medication {
   id: string;
