@@ -65,10 +65,15 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
           >
             {isTakenToday ? (
               <span className="flex items-center">
-                <Check className="h-4 w-4 mr-1" /> Tomado hoje
+                <Check className="h-4 w-4 mr-1" /> 
+                <span className="hidden sm:inline">Tomado hoje</span>
+                <span className="inline sm:hidden">Tomado</span>
               </span>
             ) : (
-              "Marcar como tomado"
+              <>
+                <span className="hidden sm:inline">Marcar como tomado</span>
+                <span className="inline sm:hidden">Marcar</span>
+              </>
             )}
           </Button>
         </div>

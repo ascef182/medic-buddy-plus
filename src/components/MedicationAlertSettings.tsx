@@ -66,8 +66,8 @@ const MedicationAlertSettings: React.FC<MedicationAlertSettingsProps> = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Bell className="h-4 w-4 mr-2" />
-          Configurar Alertas
+          <Bell className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Configurar Alertas</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">

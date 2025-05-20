@@ -84,8 +84,8 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
     <div className="space-y-4">
       <Card className="p-4">
         <div className="text-lg font-medium mb-2">Medicamentos por tipo</div>
-        {/* Reduce chart height on mobile */}
-        <div className="h-[180px] sm:h-[220px]">
+        {/* Aumentar altura do gráfico para melhor visualização */}
+        <div className="h-[250px] sm:h-[300px]">
           <ChartContainer 
             config={config}
             className="h-full"
@@ -98,7 +98,7 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => `${name}`}
-                  outerRadius={60}
+                  outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
                 >
