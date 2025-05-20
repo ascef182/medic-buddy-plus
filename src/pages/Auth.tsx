@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Heart } from "lucide-react";
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -30,7 +31,7 @@ const Auth: React.FC = () => {
         if (error) throw error;
         
         toast.success("Login realizado com sucesso!");
-        navigate("/");
+        navigate("/dashboard");
       } else {
         // Sign up
         const { data, error } = await supabase.auth.signUp({
@@ -59,7 +60,10 @@ const Auth: React.FC = () => {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">MediCare</CardTitle>
+          <div className="mx-auto flex items-center justify-center gap-2 mb-2">
+            <Heart className="h-6 w-6 text-primary" />
+            <CardTitle className="text-2xl font-bold">BuddyDoctor</CardTitle>
+          </div>
           <CardDescription>
             {isLogin ? "Faça login na sua conta" : "Crie sua conta"}
           </CardDescription>
