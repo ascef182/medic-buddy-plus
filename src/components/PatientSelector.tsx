@@ -40,14 +40,19 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
     
     const fetchPatients = async () => {
       try {
+        console.log("Fetching patients for user:", user.id);
         const { data, error } = await supabase
           .from("patients")
           .select("id, full_name")
           .eq("caregiver_id", user.id)
           .order("full_name");
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching patients:", error);
+          throw error;
+        }
         
+        console.log("Patients fetched:", data);
         if (data) {
           setPatients(data);
           
@@ -61,6 +66,7 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
               setSelectedPatient(data[0]);
               onPatientSelect(data[0].id);
               setSelectedPatientId(data[0].id);
+              localStorage.setItem("selectedPatientId", data[0].id);
               loadPatientData(data[0].id);
             }
           } else if (data.length > 0) {
@@ -68,10 +74,12 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
             setSelectedPatient(data[0]);
             onPatientSelect(data[0].id);
             setSelectedPatientId(data[0].id);
+            localStorage.setItem("selectedPatientId", data[0].id);
             loadPatientData(data[0].id);
           }
         }
       } catch (error: any) {
+        console.error("Failed to load patients:", error);
         toast.error(`Erro ao carregar pacientes: ${error.message}`);
       } finally {
         setLoading(false);

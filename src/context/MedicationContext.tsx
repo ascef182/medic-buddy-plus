@@ -1,5 +1,6 @@
+
 import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
@@ -113,129 +114,188 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
     if (!user) return;
 
     try {
-      // Load medications for the selected patient
-      const { data: medsData, error: medsError } = await supabase
-        .from("patient_medications")
-        .select("*")
-        .eq("patient_id", patientId);
-
-      if (medsError) throw medsError;
+      console.log("Loading data for patient:", patientId);
       
-      if (medsData) {
-        setMedications(medsData.map(med => ({
-          id: med.id,
-          name: med.name,
-          type: med.type,
-          dosage: med.dosage,
-          quantity: med.quantity,
-          unit: med.unit,
-          frequency: med.frequency,
-          times: med.times,
-          notes: med.notes,
-          lastTaken: med.last_taken ? new Date(med.last_taken) : undefined,
-          alert_threshold: med.alert_threshold,
-          auto_alert_contact_id: med.auto_alert_contact_id
-        })));
-      }
-
-      // Load mood entries
-      const { data: moodData, error: moodError } = await supabase
-        .from("patient_mood_entries")
-        .select("*")
-        .eq("patient_id", patientId)
-        .order("date", { ascending: false });
-
-      if (moodError) throw moodError;
-      
-      if (moodData) {
-        setMoodEntries(moodData.map(entry => ({
-          id: entry.id,
-          date: new Date(entry.date),
-          mood: entry.mood as MoodType,
-          notes: entry.notes
-        })));
-      }
-
-      // Load contacts
-      const { data: contactsData, error: contactsError } = await supabase
-        .from("patient_contacts")
-        .select("*")
-        .eq("patient_id", patientId);
-
-      if (contactsError) throw contactsError;
-      
-      if (contactsData) {
-        setContacts(contactsData.map(contact => ({
-          id: contact.id,
-          name: contact.name,
-          email: contact.email,
-          phone: contact.phone,
-          relation: contact.relation
-        })));
-      }
-
-      // Load patient profile data
+      // Load patient basic information first
       const { data: patientData, error: patientError } = await supabase
         .from("patients")
         .select("*")
         .eq("id", patientId)
+        .eq("caregiver_id", user.id)
         .single();
+        
+      if (patientError) {
+        console.error("Error loading patient:", patientError);
+        throw patientError;
+      }
+      
+      if (!patientData) {
+        toast({
+          title: "Erro ao carregar paciente",
+          description: "Paciente não encontrado ou você não tem permissão para visualizá-lo",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Load patient medications
+      try {
+        const { data: medsData, error: medsError } = await supabase
+          .from("patient_medications")
+          .select("*")
+          .eq("patient_id", patientId);
 
-      if (patientError) throw patientError;
+        if (medsError) {
+          console.error("Error loading medications:", medsError);
+        } else if (medsData) {
+          setMedications(medsData.map(med => ({
+            id: med.id,
+            name: med.name,
+            type: med.type,
+            dosage: med.dosage,
+            quantity: med.quantity,
+            unit: med.unit,
+            frequency: med.frequency,
+            times: med.times,
+            notes: med.notes,
+            lastTaken: med.last_taken ? new Date(med.last_taken) : undefined,
+            alert_threshold: med.alert_threshold,
+            auto_alert_contact_id: med.auto_alert_contact_id
+          })));
+        }
+      } catch (err) {
+        console.error("Failed to load medications:", err);
+      }
 
-      // Load allergies
-      const { data: allergiesData, error: allergiesError } = await supabase
-        .from("patient_allergies")
-        .select("allergy")
-        .eq("patient_id", patientId);
+      // Load mood entries
+      try {
+        const { data: moodData, error: moodError } = await supabase
+          .from("patient_mood_entries")
+          .select("*")
+          .eq("patient_id", patientId)
+          .order("date", { ascending: false });
 
-      if (allergiesError) throw allergiesError;
+        if (moodError) {
+          console.error("Error loading mood entries:", moodError);
+        } else if (moodData) {
+          setMoodEntries(moodData.map(entry => ({
+            id: entry.id,
+            date: new Date(entry.date),
+            mood: entry.mood as MoodType,
+            notes: entry.notes
+          })));
+        }
+      } catch (err) {
+        console.error("Failed to load mood entries:", err);
+      }
 
-      // Load chronic diseases
-      const { data: diseasesData, error: diseasesError } = await supabase
-        .from("patient_chronic_diseases")
-        .select("disease")
-        .eq("patient_id", patientId);
+      // Load contacts
+      try {
+        const { data: contactsData, error: contactsError } = await supabase
+          .from("patient_contacts")
+          .select("*")
+          .eq("patient_id", patientId);
 
-      if (diseasesError) throw diseasesError;
+        if (contactsError) {
+          console.error("Error loading contacts:", contactsError);
+        } else if (contactsData) {
+          setContacts(contactsData.map(contact => ({
+            id: contact.id,
+            name: contact.name,
+            email: contact.email,
+            phone: contact.phone,
+            relation: contact.relation
+          })));
+        }
+      } catch (err) {
+        console.error("Failed to load contacts:", err);
+      }
 
-      // Load diagnoses
-      const { data: diagnosesData, error: diagnosesError } = await supabase
-        .from("patient_diagnoses")
-        .select("diagnosis")
-        .eq("patient_id", patientId);
-
-      if (diagnosesError) throw diagnosesError;
-
-      // Load doctors
-      const { data: doctorsData, error: doctorsError } = await supabase
-        .from("patient_doctors")
-        .select("name, specialty, phone")
-        .eq("patient_id", patientId);
-
-      if (doctorsError) throw doctorsError;
-
-      // Load observations
-      const { data: obsData, error: obsError } = await supabase
-        .from("patient_observations")
-        .select("observations")
-        .eq("patient_id", patientId)
-        .maybeSingle();
-
-      if (obsError) throw obsError;
-
-      // Set patient profile
-      setPatientProfile({
+      // Set up basic profile with patient data
+      const profile: PatientProfile = {
         fullName: patientData.full_name,
-        age: patientData.age,
+        age: patientData.age || "",
         bloodType: patientData.blood_type || "",
-        allergies: allergiesData?.map(a => a.allergy) || [],
-        chronicDiseases: diseasesData?.map(d => d.disease) || [],
-        recentDiagnosis: diagnosesData?.map(d => d.diagnosis) || [],
-        doctors: doctorsData || [],
-        observations: obsData?.observations || ""
-      });
+        allergies: [],
+        chronicDiseases: [],
+        recentDiagnosis: [],
+        doctors: [],
+        observations: ""
+      };
 
+      // Try to load allergies
+      try {
+        const { data: allergiesData } = await supabase
+          .from("patient_allergies")
+          .select("allergy")
+          .eq("patient_id", patientId);
+          
+        if (allergiesData) {
+          profile.allergies = allergiesData.map(a => a.allergy);
+        }
+      } catch (err) {
+        console.error("Failed to load allergies:", err);
+      }
+
+      // Try to load chronic diseases
+      try {
+        const { data: diseasesData } = await supabase
+          .from("patient_chronic_diseases")
+          .select("disease")
+          .eq("patient_id", patientId);
+          
+        if (diseasesData) {
+          profile.chronicDiseases = diseasesData.map(d => d.disease);
+        }
+      } catch (err) {
+        console.error("Failed to load chronic diseases:", err);
+      }
+
+      // Try to load diagnoses
+      try {
+        const { data: diagnosesData } = await supabase
+          .from("patient_diagnoses")
+          .select("diagnosis")
+          .eq("patient_id", patientId);
+          
+        if (diagnosesData) {
+          profile.recentDiagnosis = diagnosesData.map(d => d.diagnosis);
+        }
+      } catch (err) {
+        console.error("Failed to load diagnoses:", err);
+      }
+
+      // Try to load doctors
+      try {
+        const { data: doctorsData } = await supabase
+          .from("patient_doctors")
+          .select("name, specialty, phone")
+          .eq("patient_id", patientId);
+          
+        if (doctorsData) {
+          profile.doctors = doctorsData;
+        }
+      } catch (err) {
+        console.error("Failed to load doctors:", err);
+      }
+
+      // Try to load observations
+      try {
+        const { data: obsData } = await supabase
+          .from("patient_observations")
+          .select("observations")
+          .eq("patient_id", patientId)
+          .maybeSingle();
+          
+        if (obsData) {
+          profile.observations = obsData.observations || "";
+        }
+      } catch (err) {
+        console.error("Failed to load observations:", err);
+      }
+
+      setPatientProfile(profile);
+      
     } catch (error: any) {
       console.error("Error loading patient data:", error);
       toast({
@@ -259,6 +319,8 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
     }
 
     try {
+      console.log("Adding medication for patient:", pid, medication);
+      
       const { data, error } = await supabase
         .from("patient_medications")
         .insert({
@@ -275,7 +337,10 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error inserting medication:", error);
+        throw error;
+      }
 
       setMedications([...medications, {
         id: data.id,
@@ -287,6 +352,7 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
         description: `${medication.name} foi adicionado com sucesso.`,
       });
     } catch (error: any) {
+      console.error("Failed to add medication:", error);
       toast({
         title: "Erro ao adicionar medicamento",
         description: error.message,
@@ -580,6 +646,8 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
     if (!selectedPatientId) return;
 
     try {
+      console.log("Updating profile for patient:", selectedPatientId, profile);
+      
       // Update basic patient info
       const { error: patientError } = await supabase
         .from("patients")
@@ -590,97 +658,120 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
         })
         .eq("id", selectedPatientId);
 
-      if (patientError) throw patientError;
+      if (patientError) {
+        console.error("Error updating patient:", patientError);
+        throw patientError;
+      }
 
-      // Delete existing allergies and insert new ones
-      await supabase
-        .from("patient_allergies")
-        .delete()
-        .eq("patient_id", selectedPatientId);
-      
-      if (profile.allergies.length > 0) {
+      // Handle allergies - delete existing and add new ones
+      try {
         await supabase
           .from("patient_allergies")
-          .insert(
-            profile.allergies.map(allergy => ({
-              patient_id: selectedPatientId,
-              allergy
-            }))
-          );
+          .delete()
+          .eq("patient_id", selectedPatientId);
+        
+        if (profile.allergies.length > 0) {
+          await supabase
+            .from("patient_allergies")
+            .insert(
+              profile.allergies.map(allergy => ({
+                patient_id: selectedPatientId,
+                allergy
+              }))
+            );
+        }
+      } catch (error) {
+        console.error("Error updating allergies:", error);
       }
 
-      // Delete existing chronic diseases and insert new ones
-      await supabase
-        .from("patient_chronic_diseases")
-        .delete()
-        .eq("patient_id", selectedPatientId);
-      
-      if (profile.chronicDiseases.length > 0) {
+      // Handle chronic diseases - delete existing and add new ones
+      try {
         await supabase
           .from("patient_chronic_diseases")
-          .insert(
-            profile.chronicDiseases.map(disease => ({
-              patient_id: selectedPatientId,
-              disease
-            }))
-          );
+          .delete()
+          .eq("patient_id", selectedPatientId);
+        
+        if (profile.chronicDiseases.length > 0) {
+          await supabase
+            .from("patient_chronic_diseases")
+            .insert(
+              profile.chronicDiseases.map(disease => ({
+                patient_id: selectedPatientId,
+                disease
+              }))
+            );
+        }
+      } catch (error) {
+        console.error("Error updating chronic diseases:", error);
       }
 
-      // Delete existing diagnoses and insert new ones
-      await supabase
-        .from("patient_diagnoses")
-        .delete()
-        .eq("patient_id", selectedPatientId);
-      
-      if (profile.recentDiagnosis.length > 0) {
+      // Handle diagnoses - delete existing and add new ones
+      try {
         await supabase
           .from("patient_diagnoses")
-          .insert(
-            profile.recentDiagnosis.map(diagnosis => ({
-              patient_id: selectedPatientId,
-              diagnosis
-            }))
-          );
+          .delete()
+          .eq("patient_id", selectedPatientId);
+        
+        if (profile.recentDiagnosis.length > 0) {
+          await supabase
+            .from("patient_diagnoses")
+            .insert(
+              profile.recentDiagnosis.map(diagnosis => ({
+                patient_id: selectedPatientId,
+                diagnosis
+              }))
+            );
+        }
+      } catch (error) {
+        console.error("Error updating diagnoses:", error);
       }
 
-      // Delete existing doctors and insert new ones
-      await supabase
-        .from("patient_doctors")
-        .delete()
-        .eq("patient_id", selectedPatientId);
-      
-      if (profile.doctors.length > 0) {
+      // Handle doctors - delete existing and add new ones
+      try {
         await supabase
           .from("patient_doctors")
-          .insert(
-            profile.doctors.map(doctor => ({
-              patient_id: selectedPatientId,
-              name: doctor.name,
-              specialty: doctor.specialty,
-              phone: doctor.phone
-            }))
-          );
+          .delete()
+          .eq("patient_id", selectedPatientId);
+        
+        if (profile.doctors.length > 0) {
+          await supabase
+            .from("patient_doctors")
+            .insert(
+              profile.doctors.map(doctor => ({
+                patient_id: selectedPatientId,
+                name: doctor.name,
+                specialty: doctor.specialty,
+                phone: doctor.phone
+              }))
+            );
+        }
+      } catch (error) {
+        console.error("Error updating doctors:", error);
       }
 
       // Update observations
-      const { data: existingObs } = await supabase
-        .from("patient_observations")
-        .select("id")
-        .eq("patient_id", selectedPatientId)
-        .maybeSingle();
+      try {
+        const { data: existingObs } = await supabase
+          .from("patient_observations")
+          .select("id")
+          .eq("patient_id", selectedPatientId)
+          .maybeSingle();
 
-      if (existingObs) {
-        await supabase
-          .from("patient_observations")
-          .update({ observations: profile.observations })
-          .eq("id", existingObs.id);
-      } else {
-        await supabase
-          .from("patient_observations")
-          .insert({
-            patient_id: selectedPatientId,
-            observations: profile.observations
-          });
+        if (existingObs) {
+          await supabase
+            .from("patient_observations")
+            .update({ observations: profile.observations })
+            .eq("id", existingObs.id);
+        } else {
+          await supabase
+            .from("patient_observations")
+            .insert({
+              patient_id: selectedPatientId,
+              observations: profile.observations
+            });
+        }
+      } catch (error) {
+        console.error("Error updating observations:", error);
       }
 
       setPatientProfile(profile);
@@ -690,6 +781,7 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
         description: "Os dados do paciente foram atualizados com sucesso.",
       });
     } catch (error: any) {
+      console.error("Error updating profile:", error);
       toast({
         title: "Erro ao atualizar perfil",
         description: error.message,
