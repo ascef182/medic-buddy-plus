@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PlusCircle, Clock, User } from "lucide-react";
+import { PlusCircle, Clock, User, ChartBar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from "@/components/layout/Layout";
@@ -100,6 +100,15 @@ const Index = () => {
         >
           <User className="h-6 w-6 mb-2" />
           <span>{patientProfile?.fullName ? "Editar Ficha Médica" : "Criar Ficha Médica"}</span>
+        </Button>
+        
+        <Button
+          variant="outline"
+          className="h-24 flex flex-col items-center justify-center"
+          onClick={() => navigate("/insights")}
+        >
+          <ChartBar className="h-6 w-6 mb-2" />
+          <span>Insights e Análises</span>
         </Button>
       </div>
     </Layout>
