@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import { MedicationProvider } from "@/context/MedicationContext";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Pages
 import Medications from "@/pages/Medications";

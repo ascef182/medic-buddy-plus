@@ -1,6 +1,5 @@
-
 import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
@@ -100,7 +99,6 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
     localStorage.getItem("selectedPatientId")
   );
-  const { toast } = useToast();
   const { user } = useAuth();
 
   // Load patient data whenever selectedPatientId changes
