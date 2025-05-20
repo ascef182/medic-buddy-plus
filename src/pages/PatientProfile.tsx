@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, X } from "lucide-react";
@@ -181,13 +180,14 @@ const PatientProfilePage = () => {
               <div>
                 <Label htmlFor="bloodType">Tipo Sanguíneo</Label>
                 <Select 
-                  value={profile.bloodType} 
-                  onValueChange={(value) => setProfile({ ...profile, bloodType: value })}
+                  value={profile.bloodType || "not_specified"} 
+                  onValueChange={(value) => setProfile({ ...profile, bloodType: value === "not_specified" ? "" : value })}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Selecione o tipo sanguíneo" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="not_specified">Não especificado</SelectItem>
                     <SelectItem value="A+">A+</SelectItem>
                     <SelectItem value="A-">A-</SelectItem>
                     <SelectItem value="B+">B+</SelectItem>

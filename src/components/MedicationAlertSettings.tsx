@@ -104,7 +104,7 @@ const MedicationAlertSettings: React.FC<MedicationAlertSettingsProps> = ({
                 <SelectValue placeholder="Selecione um contato" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhum</SelectItem>
+                <SelectItem value="none">Nenhum</SelectItem>
                 {contacts.map(contact => (
                   <SelectItem key={contact.id} value={contact.id}>
                     {contact.name} ({contact.relation})
