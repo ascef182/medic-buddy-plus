@@ -102,8 +102,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     
     try {
-      // Create or update user settings to enable 2FA
-      const { error } = await supabase.rpc('set_two_factor_enabled', { 
+      // Use type assertion to tell TypeScript that the rpc function exists
+      const { error } = await (supabase.rpc as any)('set_two_factor_enabled', { 
         enabled: true 
       });
       
@@ -123,8 +123,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     
     try {
-      // Update user settings to disable 2FA
-      const { error } = await supabase.rpc('set_two_factor_enabled', { 
+      // Use type assertion to tell TypeScript that the rpc function exists
+      const { error } = await (supabase.rpc as any)('set_two_factor_enabled', { 
         enabled: false 
       });
       

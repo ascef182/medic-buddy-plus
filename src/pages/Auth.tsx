@@ -72,7 +72,7 @@ const Auth: React.FC = () => {
         if (error) throw error;
         
         // Check if 2FA is enabled for this user
-        const { data: twoFactorEnabled } = await supabase.rpc('is_two_factor_enabled');
+        const { data: twoFactorEnabled } = await (supabase.rpc as any)('is_two_factor_enabled');
         
         if (twoFactorEnabled) {
           // Send OTP email
