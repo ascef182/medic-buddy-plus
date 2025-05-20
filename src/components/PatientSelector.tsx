@@ -100,7 +100,7 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
 
   if (patients.length === 0) {
     return (
-      <Link to="/adicionar-paciente">
+      <Link to="/pacientes/adicionar">
         <Button>
           <PlusCircle className="mr-2 h-5 w-5" />
           Adicionar Paciente
@@ -138,7 +138,7 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
             Gerenciar pacientes
           </DropdownMenuItem>
         </Link>
-        <Link to="/adicionar-paciente" className="w-full">
+        <Link to="/pacientes/adicionar" className="w-full">
           <DropdownMenuItem className="cursor-pointer">
             <PlusCircle className="mr-2 h-4 w-4" />
             Adicionar paciente

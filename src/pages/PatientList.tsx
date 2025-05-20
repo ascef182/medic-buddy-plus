@@ -77,7 +77,7 @@ const PatientList: React.FC = () => {
       <div className="container mx-auto p-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Meus Pacientes</h1>
-          <Link to="/adicionar-paciente">
+          <Link to="/pacientes/adicionar">
             <Button>
               <PlusCircle className="mr-2 h-5 w-5" />
               Adicionar Paciente
@@ -112,7 +112,7 @@ const PatientList: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => navigate(`/editar-paciente/${patient.id}`)}
+                          onClick={() => navigate(`/pacientes/editar/${patient.id}`)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -144,7 +144,7 @@ const PatientList: React.FC = () => {
             <p className="mt-2 text-muted-foreground">
               Adicione seu primeiro paciente para começar a gerenciar seus medicamentos e cuidados
             </p>
-            <Link to="/adicionar-paciente">
+            <Link to="/pacientes/adicionar">
               <Button className="mt-4">
                 <PlusCircle className="mr-2 h-5 w-5" />
                 Adicionar Paciente
