@@ -97,7 +97,7 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => `${name}`}
-                  outerRadius={({ cx }) => Math.min(cx * 0.6, 80)}
+                  outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
                 >
