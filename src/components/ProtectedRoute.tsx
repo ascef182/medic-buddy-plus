@@ -18,6 +18,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
+  // Se o usuário está autenticado, mas está na raiz "/", redirecione para "/dashboard"
+  if (window.location.pathname === "/") {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return children;
 };
 

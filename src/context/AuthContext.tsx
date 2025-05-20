@@ -3,6 +3,7 @@ import React, { createContext, useState, useContext, useEffect, ReactNode } from
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   session: Session | null;
@@ -50,6 +51,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await supabase.auth.signOut();
       localStorage.removeItem("selectedPatientId");
+      // Não precisamos redirecionar aqui, pois o evento SIGNED_OUT será capturado pelo listener
     } catch (error: any) {
       toast.error(`Erro ao fazer logout: ${error.message}`);
     }

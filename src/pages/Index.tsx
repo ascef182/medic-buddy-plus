@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PlusCircle, Clock, User, ChartBar } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,24 +8,67 @@ import Layout from "@/components/layout/Layout";
 import MedicationCard from "@/components/MedicationCard";
 import MoodTracker from "@/components/MoodTracker";
 import { useMedication } from "@/context/MedicationContext";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "@/components/ui/sonner";
 
 const Index = () => {
-  const { medications, patientProfile } = useMedication();
+  const { medications, patientProfile, selectedPatientId, setSelectedPatientId } = useMedication();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  
   const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const currentDate = new Date().toLocaleDateString('pt-BR', { 
     weekday: 'long', 
     day: 'numeric', 
     month: 'long' 
   });
+
+  const [greeting, setGreeting] = useState("Olá");
   
+  useEffect(() => {
+    // Define saudação baseada no horário atual
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) setGreeting("Bom dia");
+    else if (hour >= 12 && hour < 18) setGreeting("Boa tarde");
+    else setGreeting("Boa noite");
+    
+    // Redirecionar para o dashboard se estiver na raiz
+    if (window.location.pathname === "/") {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
+  const handleAddMedication = () => {
+    if (!selectedPatientId) {
+      toast.error("Selecione um paciente primeiro");
+      return;
+    }
+    navigate("/medicamentos/adicionar");
+  };
+  
+  const handleManageContacts = () => {
+    if (!selectedPatientId) {
+      toast.error("Selecione um paciente primeiro");
+      return;
+    }
+    navigate("/contatos");
+  };
+  
+  const handleEditProfile = () => {
+    if (!selectedPatientId) {
+      toast.error("Selecione um paciente primeiro");
+      return;
+    }
+    navigate("/perfil");
+  };
+
   return (
     <Layout>
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-3xl font-bold">
-              {patientProfile?.fullName ? `Olá, ${patientProfile.fullName.split(' ')[0]}!` : 'Olá!'}
+              {user ? `${greeting}, ${user.email?.split('@')[0]}!` : `${greeting}!`}
             </h2>
             <p className="text-muted-foreground">
               <span className="capitalize">{currentDate}</span>
@@ -47,30 +90,51 @@ const Index = () => {
             </Button>
           </CardHeader>
           <CardContent>
-            {medications.length > 0 ? (
-              <div>
-                {medications.slice(0, 3).map((medication) => (
-                  <MedicationCard key={medication.id} medication={medication} />
-                ))}
-              </div>
+            {selectedPatientId ? (
+              medications.length > 0 ? (
+                <div>
+                  {medications.slice(0, 3).map((medication) => (
+                    <MedicationCard key={medication.id} medication={medication} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <p className="text-muted-foreground mb-4">
+                    Nenhum medicamento cadastrado para este paciente
+                  </p>
+                  <Button
+                    onClick={handleAddMedication}
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Adicionar Medicamento
+                  </Button>
+                </div>
+              )
             ) : (
               <div className="text-center py-6">
                 <p className="text-muted-foreground mb-4">
-                  Nenhum medicamento cadastrado
+                  Selecione um paciente para ver seus medicamentos
                 </p>
-                <Button
-                  onClick={() => navigate("/medicamentos/adicionar")}
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Adicionar Medicamento
-                </Button>
               </div>
             )}
           </CardContent>
         </Card>
 
         <div>
-          <MoodTracker />
+          {selectedPatientId ? (
+            <MoodTracker />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-center">Como você está se sentindo?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-center text-muted-foreground mb-4">
+                  Selecione um paciente para registrar seu humor
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
@@ -78,7 +142,7 @@ const Index = () => {
         <Button
           variant="outline"
           className="h-24 flex flex-col items-center justify-center"
-          onClick={() => navigate("/medicamentos/adicionar")}
+          onClick={handleAddMedication}
         >
           <PlusCircle className="h-6 w-6 mb-2" />
           <span>Adicionar Medicamento</span>
@@ -87,7 +151,7 @@ const Index = () => {
         <Button
           variant="outline"
           className="h-24 flex flex-col items-center justify-center"
-          onClick={() => navigate("/contatos")}
+          onClick={handleManageContacts}
         >
           <PlusCircle className="h-6 w-6 mb-2" />
           <span>Gerenciar Contatos</span>
@@ -96,7 +160,7 @@ const Index = () => {
         <Button
           variant={patientProfile?.fullName ? "outline" : "default"}
           className="h-24 flex flex-col items-center justify-center"
-          onClick={() => navigate("/perfil")}
+          onClick={handleEditProfile}
         >
           <User className="h-6 w-6 mb-2" />
           <span>{patientProfile?.fullName ? "Editar Ficha Médica" : "Criar Ficha Médica"}</span>
@@ -105,7 +169,7 @@ const Index = () => {
         <Button
           variant="outline"
           className="h-24 flex flex-col items-center justify-center"
-          onClick={() => navigate("/insights")}
+          onClick={() => selectedPatientId ? navigate("/insights") : toast.error("Selecione um paciente primeiro")}
         >
           <ChartBar className="h-6 w-6 mb-2" />
           <span>Insights e Análises</span>
