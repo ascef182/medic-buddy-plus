@@ -13,6 +13,7 @@ import { toast } from "@/components/ui/sonner";
 import { ChevronDown, PlusCircle, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { useMedication } from "@/context/MedicationContext";
 
 interface Patient {
   id: string;
@@ -32,6 +33,7 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
   const [loading, setLoading] = useState(true);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const { user } = useAuth();
+  const { setSelectedPatientId, loadPatientData } = useMedication();
 
   useEffect(() => {
     if (!user) return;
@@ -58,11 +60,15 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
               // If selected ID doesn't exist but we have patients, select the first one
               setSelectedPatient(data[0]);
               onPatientSelect(data[0].id);
+              setSelectedPatientId(data[0].id);
+              loadPatientData(data[0].id);
             }
           } else if (data.length > 0) {
             // No selected ID but we have patients, select the first one
             setSelectedPatient(data[0]);
             onPatientSelect(data[0].id);
+            setSelectedPatientId(data[0].id);
+            loadPatientData(data[0].id);
           }
         }
       } catch (error: any) {
@@ -73,11 +79,15 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
     };
 
     fetchPatients();
-  }, [user, selectedPatientId, onPatientSelect]);
+  }, [user, selectedPatientId, onPatientSelect, setSelectedPatientId, loadPatientData]);
 
   const handlePatientSelect = (patient: Patient) => {
     setSelectedPatient(patient);
     onPatientSelect(patient.id);
+    setSelectedPatientId(patient.id);
+    localStorage.setItem("selectedPatientId", patient.id);
+    loadPatientData(patient.id);
+    toast.success(`Paciente ${patient.full_name} selecionado com sucesso!`);
   };
 
   if (loading) {

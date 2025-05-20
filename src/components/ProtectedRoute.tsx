@@ -1,7 +1,9 @@
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/sonner";
 import Loading from "@/components/Loading";
 
 interface ProtectedRouteProps {
@@ -11,6 +13,8 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [checkingPatients, setCheckingPatients] = useState(true);
+  const [hasPatients, setHasPatients] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -18,7 +22,38 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
   }, [user, loading, navigate]);
 
-  if (loading) {
+  useEffect(() => {
+    if (user) {
+      const checkPatients = async () => {
+        try {
+          const { data, error, count } = await supabase
+            .from("patients")
+            .select("id", { count: 'exact' })
+            .eq("caregiver_id", user.id)
+            .limit(1);
+
+          if (error) throw error;
+          
+          setHasPatients(count !== null && count > 0);
+          
+          // If current route is not add patient and user has no patients, redirect
+          if (count === 0 && window.location.pathname !== "/adicionar-paciente" && 
+              window.location.pathname !== "/pacientes") {
+            toast.info("Por favor, adicione um paciente para começar");
+            navigate("/adicionar-paciente");
+          }
+        } catch (error: any) {
+          console.error("Erro ao verificar pacientes:", error);
+        } finally {
+          setCheckingPatients(false);
+        }
+      };
+
+      checkPatients();
+    }
+  }, [user, navigate]);
+
+  if (loading || checkingPatients) {
     return <Loading />;
   }
 

@@ -1,39 +1,36 @@
 
-import { ReactNode, useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { Home, PillBottle, Bell, Smile, User, ClipboardList, LogOut } from "lucide-react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import {
+  Pill,
+  Clock,
+  FileText,
+  User,
+  Menu,
+  LogOut,
+  Users,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import PatientSelector from "@/components/PatientSelector";
+import { useMedication } from "@/context/MedicationContext";
 
 interface LayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-const Layout = ({ children }: LayoutProps) => {
-  const { user, signOut } = useAuth();
-  const { toast } = useToast();
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const [open, setOpen] = useState(false);
+  const { signOut } = useAuth();
   const navigate = useNavigate();
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
-    localStorage.getItem("selectedPatientId")
-  );
+  const { selectedPatientId, setSelectedPatientId } = useMedication();
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast({
-        title: "Logout realizado com sucesso",
-        description: "Você foi desconectado da sua conta.",
-      });
-      navigate("/auth");
-    } catch (error: any) {
-      toast({
-        title: "Erro ao fazer logout",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    await signOut();
+    navigate("/auth");
   };
 
   const handlePatientSelect = (id: string) => {
@@ -41,102 +38,152 @@ const Layout = ({ children }: LayoutProps) => {
     localStorage.setItem("selectedPatientId", id);
   };
 
+  const menuItems = [
+    {
+      title: "Início",
+      path: "/",
+      icon: <User className="h-5 w-5" />,
+    },
+    {
+      title: "Medicamentos",
+      path: "/medicamentos",
+      icon: <Pill className="h-5 w-5" />,
+    },
+    {
+      title: "Lembretes",
+      path: "/lembretes",
+      icon: <Clock className="h-5 w-5" />,
+    },
+    {
+      title: "Humor",
+      path: "/humor",
+      icon: <FileText className="h-5 w-5" />,
+    },
+    {
+      title: "Contatos",
+      path: "/contatos",
+      icon: <Users className="h-5 w-5" />,
+    },
+    {
+      title: "Perfil Médico",
+      path: "/perfil",
+      icon: <FileText className="h-5 w-5" />,
+    },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-primary p-4 text-white flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <PillBottle size={24} />
-          <h1 className="text-2xl font-semibold">MediCare</h1>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {user && (
-            <>
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 bg-background border-b">
+        <div className="container flex items-center h-16 px-4">
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="mr-2 md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72">
+              <div className="flex flex-col h-full">
+                <div className="py-4">
+                  <h2 className="text-lg font-semibold">BuddyDoctor</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Assistente de Cuidados para Idosos
+                  </p>
+                </div>
+                <Separator />
+                <div className="mt-4 mb-4">
+                  <PatientSelector 
+                    selectedPatientId={selectedPatientId} 
+                    onPatientSelect={handlePatientSelect} 
+                  />
+                </div>
+                <Separator />
+                <nav className="flex-1 py-4">
+                  <div className="grid gap-1">
+                    {menuItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                          window.location.pathname === item.path &&
+                            "bg-accent text-accent-foreground font-medium"
+                        )}
+                      >
+                        {item.icon}
+                        {item.title}
+                      </Link>
+                    ))}
+                  </div>
+                </nav>
+                <Separator />
+                <Button
+                  variant="ghost"
+                  className="mt-4 justify-start gap-3"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-5 w-5" />
+                  Sair
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+          <Link to="/" className="flex items-center gap-2 font-semibold">
+            <User className="h-6 w-6" />
+            <span className="hidden md:inline-block">BuddyDoctor</span>
+          </Link>
+          <div className="ml-auto flex items-center gap-4">
+            <div className="hidden md:block">
               <PatientSelector 
                 selectedPatientId={selectedPatientId} 
                 onPatientSelect={handlePatientSelect} 
               />
-              <Button variant="ghost" size="icon" onClick={handleSignOut}>
-                <LogOut size={20} />
-              </Button>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </header>
-
-      <main className="flex-1 container mx-auto p-4">{children}</main>
-
-      <footer className="border-t bg-white">
-        <nav className="flex justify-around items-center">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `flex flex-col items-center p-3 flex-1 ${
-                isActive ? "text-primary" : "text-gray-500"
-              }`
-            }
-            end
-          >
-            <Home size={24} />
-            <span className="text-xs mt-1">Início</span>
-          </NavLink>
-          <NavLink
-            to="/medicamentos"
-            className={({ isActive }) =>
-              `flex flex-col items-center p-3 flex-1 ${
-                isActive ? "text-primary" : "text-gray-500"
-              }`
-            }
-          >
-            <PillBottle size={24} />
-            <span className="text-xs mt-1">Remédios</span>
-          </NavLink>
-          <NavLink
-            to="/lembretes"
-            className={({ isActive }) =>
-              `flex flex-col items-center p-3 flex-1 ${
-                isActive ? "text-primary" : "text-gray-500"
-              }`
-            }
-          >
-            <Bell size={24} />
-            <span className="text-xs mt-1">Lembretes</span>
-          </NavLink>
-          <NavLink
-            to="/humor"
-            className={({ isActive }) =>
-              `flex flex-col items-center p-3 flex-1 ${
-                isActive ? "text-primary" : "text-gray-500"
-              }`
-            }
-          >
-            <Smile size={24} />
-            <span className="text-xs mt-1">Humor</span>
-          </NavLink>
-          <NavLink
-            to="/perfil"
-            className={({ isActive }) =>
-              `flex flex-col items-center p-3 flex-1 ${
-                isActive ? "text-primary" : "text-gray-500"
-              }`
-            }
-          >
-            <ClipboardList size={24} />
-            <span className="text-xs mt-1">Ficha Médica</span>
-          </NavLink>
-          <NavLink
-            to="/pacientes"
-            className={({ isActive }) =>
-              `flex flex-col items-center p-3 flex-1 ${
-                isActive ? "text-primary" : "text-gray-500"
-              }`
-            }
-          >
-            <User size={24} />
-            <span className="text-xs mt-1">Pacientes</span>
-          </NavLink>
-        </nav>
-      </footer>
+      <div className="hidden md:flex">
+        <aside className="fixed inset-y-0 left-0 w-64 bg-background border-r pt-16">
+          <div className="flex flex-col h-full py-6 px-4">
+            <nav className="flex-1">
+              <div className="grid gap-1">
+                {menuItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                      window.location.pathname === item.path &&
+                        "bg-accent text-accent-foreground font-medium"
+                    )}
+                  >
+                    {item.icon}
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+            </nav>
+            <Separator className="my-4" />
+            <Button
+              variant="ghost"
+              className="justify-start gap-3"
+              onClick={handleSignOut}
+            >
+              <LogOut className="h-5 w-5" />
+              Sair
+            </Button>
+          </div>
+        </aside>
+        <main className="flex-1 pl-64">
+          <div className="container py-6 px-4">{children}</div>
+        </main>
+      </div>
+      <div className="flex md:hidden">
+        <main className="flex-1">
+          <div className="container py-6 px-4">{children}</div>
+        </main>
+      </div>
     </div>
   );
 };

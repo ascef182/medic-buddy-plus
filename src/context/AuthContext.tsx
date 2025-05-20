@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/sonner";
 
 interface AuthContextType {
   session: Session | null;
@@ -21,6 +22,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (event === 'SIGNED_IN') {
+          toast.success('Login realizado com sucesso!');
+        } else if (event === 'SIGNED_OUT') {
+          toast.info('Logout realizado com sucesso!');
+          // Clear localStorage patient selection on logout
+          localStorage.removeItem("selectedPatientId");
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -38,7 +47,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      localStorage.removeItem("selectedPatientId");
+    } catch (error: any) {
+      toast.error(`Erro ao fazer logout: ${error.message}`);
+    }
   };
 
   const value = {
