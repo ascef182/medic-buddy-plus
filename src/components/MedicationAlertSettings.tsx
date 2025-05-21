@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,14 +21,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Bell } from "lucide-react";
 import { useMedication } from "@/context/MedicationContext";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface MedicationAlertSettingsProps {
   medicationId: string;
   medicationName: string;
   alertThreshold?: number;
-  autoAlertContactId?: string;
+  autoAlertContactId?: string | null;
 }
 
 const MedicationAlertSettings: React.FC<MedicationAlertSettingsProps> = ({ 
@@ -40,20 +40,15 @@ const MedicationAlertSettings: React.FC<MedicationAlertSettingsProps> = ({
   const [open, setOpen] = useState(false);
   const [threshold, setThreshold] = useState(alertThreshold);
   const [selectedContactId, setSelectedContactId] = useState<string | undefined>(autoAlertContactId);
-  const { contacts } = useMedication();
+  const { contacts, updateMedication } = useMedication();
 
   const saveSettings = async () => {
     try {
-      const { error } = await supabase
-        .from("patient_medications")
-        .update({
-          alert_threshold: threshold,
-          auto_alert_contact_id: selectedContactId || null
-        })
-        .eq("id", medicationId);
-
-      if (error) throw error;
-
+      await updateMedication(medicationId, {
+        alert_threshold: threshold,
+        auto_alert_contact_id: selectedContactId || null
+      });
+      
       toast.success("Configurações de alerta salvas com sucesso!");
       setOpen(false);
     } catch (error: any) {

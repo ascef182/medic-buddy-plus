@@ -3,10 +3,10 @@ import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
-import { Medication } from "@/context/MedicationContext";
+import { MedicationType } from "@/context/MedicationContext";
 
 interface MedicationUsageChartProps {
-  medications: Medication[];
+  medications: MedicationType[];
   dateRange: {
     from: Date;
     to: Date;

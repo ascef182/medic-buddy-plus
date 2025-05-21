@@ -3,10 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { useMedication } from "@/context/MedicationContext";
-import { MoodType } from "@/context/MedicationContext";
+import { useMedication, MoodType } from "@/context/MedicationContext";
 
 const MoodTracker: React.FC = () => {
   const { addMoodEntry } = useMedication();

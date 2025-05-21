@@ -3,11 +3,11 @@ import React from "react";
 import { PillBottle, Clock, Check, Bell } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Medication, useMedication } from "@/context/MedicationContext";
+import { useMedication, MedicationType } from "@/context/MedicationContext";
 import MedicationAlertSettings from "@/components/MedicationAlertSettings";
 
 interface MedicationCardProps {
-  medication: Medication;
+  medication: MedicationType;
 }
 
 const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
@@ -15,10 +15,10 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
   const { id, name, type, dosage, quantity, unit, times } = medication;
 
   // Próximo horário de tomar (simplificado para esta versão)
-  const nextTime = times[0] || "08:00";
+  const nextTime = times && times.length > 0 ? times[0] : "08:00";
   
-  const isTakenToday = medication.lastTaken
-    ? new Date(medication.lastTaken).toDateString() === new Date().toDateString()
+  const isTakenToday = medication.last_taken
+    ? new Date(medication.last_taken).toDateString() === new Date().toDateString()
     : false;
 
   return (

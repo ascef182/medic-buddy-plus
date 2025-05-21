@@ -52,6 +52,7 @@ const AddMedicationForm: React.FC = () => {
       frequency,
       times: times.filter((t) => t), // Remove empty times
       notes,
+      patient_id: null, // This will be set in the context
     });
 
     // Reset form

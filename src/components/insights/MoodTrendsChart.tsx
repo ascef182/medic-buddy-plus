@@ -5,7 +5,7 @@ import { ptBR } from "date-fns/locale";
 import { ChartContainer } from "@/components/ui/chart";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
-import { MoodEntry, MoodType } from "@/context/MedicationContext";
+import { MoodType, MoodEntry } from "@/context/MedicationContext";
 
 interface MoodTrendsChartProps {
   moodEntries: MoodEntry[];
@@ -76,12 +76,13 @@ const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
     
     return days.map(day => {
       // Filtrar entradas de humor para este dia
-      const entriesForDay = moodEntries.filter(entry => 
-        isWithinInterval(new Date(entry.date), {
+      const entriesForDay = moodEntries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return isWithinInterval(entryDate, {
           start: new Date(day.setHours(0, 0, 0, 0)),
           end: new Date(day.setHours(23, 59, 59, 999))
-        })
-      );
+        });
+      });
       
       // Se não houver entradas para este dia, retornar null para valor de humor
       if (entriesForDay.length === 0) {
@@ -94,10 +95,11 @@ const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
       }
       
       // Calcular humor médio para o dia (média dos valores numéricos)
-      const totalMoodValue = entriesForDay.reduce(
-        (sum, entry) => sum + MOOD_VALUES[entry.mood], 
-        0
-      );
+      let totalMoodValue = 0;
+      
+      for (const entry of entriesForDay) {
+        totalMoodValue += MOOD_VALUES[entry.mood as MoodType];
+      }
       
       const avgMoodValue = totalMoodValue / entriesForDay.length;
       
@@ -125,13 +127,12 @@ const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
 
   // Calcular estatísticas de humor
   const moodStats = useMemo(() => {
-    const moodCounts = moodEntries.reduce(
-      (acc, entry) => {
-        acc[entry.mood] = (acc[entry.mood] || 0) + 1;
-        return acc;
-      },
-      {} as Record<MoodType, number>
-    );
+    const moodCounts: Record<string, number> = {};
+    
+    for (const entry of moodEntries) {
+      const moodType = entry.mood as MoodType;
+      moodCounts[moodType] = (moodCounts[moodType] || 0) + 1;
+    }
     
     const total = Object.values(moodCounts).reduce((sum, count) => sum + count, 0);
     
