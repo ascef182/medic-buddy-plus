@@ -39,7 +39,7 @@ const Exams = () => {
   const [results, setResults] = useState("");
 
   const handleAddExam = () => {
-    if (!title || !date) {
+    if (!title || !date || !selectedPatientId) {
       return;
     }
 
@@ -48,7 +48,7 @@ const Exams = () => {
     examDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
 
     addExam({
-      patient_id: selectedPatientId!,
+      patient_id: selectedPatientId,
       title,
       facility,
       exam_date: examDate.toISOString(),

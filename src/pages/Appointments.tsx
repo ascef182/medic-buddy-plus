@@ -40,7 +40,7 @@ const Appointments = () => {
   const [notes, setNotes] = useState("");
 
   const handleAddAppointment = () => {
-    if (!title || !date) {
+    if (!title || !date || !selectedPatientId) {
       return;
     }
 
@@ -49,7 +49,7 @@ const Appointments = () => {
     appointmentDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
 
     addAppointment({
-      patient_id: selectedPatientId!,
+      patient_id: selectedPatientId,
       title,
       doctor,
       location,

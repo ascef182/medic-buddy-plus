@@ -18,13 +18,13 @@ export type MedicationType = {
   alert_threshold?: number;
   auto_alert_contact_id?: string | null;
   
-  // New fields for enhanced medication management - all as strings for Supabase compatibility
-  dose_per_intake: number; // Amount consumed per dose (e.g., 1 pill, 5ml)
+  // New fields for enhanced medication management
+  dose_per_intake: number;
   start_date: string;
   end_date?: string | null;
   expiry_date?: string | null;
-  is_recurring: boolean; // Continuous medication or temporary treatment
-  stock_alert_threshold: number; // When to alert for low stock
+  is_recurring: boolean;
+  stock_alert_threshold: number;
   restock_history: RestockEntry[];
 };
 
@@ -190,17 +190,18 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
 
       console.log("Medications fetched:", data);
       if (data) {
-        setMedications(data.map(med => ({
+        // Convert Supabase data to MedicationType with proper type casting
+        const typedMedications: MedicationType[] = data.map(med => ({
           ...med,
-          // Ensure all required fields are present with proper defaults
           dose_per_intake: med.dose_per_intake || 1,
           start_date: med.start_date || new Date().toISOString().split('T')[0],
           end_date: med.end_date || null,
           expiry_date: med.expiry_date || null,
           is_recurring: med.is_recurring || false,
           stock_alert_threshold: med.stock_alert_threshold || 5,
-          restock_history: med.restock_history || []
-        })));
+          restock_history: Array.isArray(med.restock_history) ? med.restock_history as RestockEntry[] : []
+        }));
+        setMedications(typedMedications);
       }
     } catch (error: any) {
       console.error("Failed to load medications:", error);
@@ -300,6 +301,12 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       if (data) {
         const newMedication: MedicationType = {
           ...data,
+          dose_per_intake: data.dose_per_intake || 1,
+          start_date: data.start_date || new Date().toISOString().split('T')[0],
+          end_date: data.end_date || null,
+          expiry_date: data.expiry_date || null,
+          is_recurring: data.is_recurring || false,
+          stock_alert_threshold: data.stock_alert_threshold || 5,
           restock_history: []
         };
         setMedications(prev => [...prev, newMedication]);

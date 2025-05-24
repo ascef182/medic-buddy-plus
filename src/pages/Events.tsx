@@ -39,7 +39,7 @@ const Events = () => {
   const [description, setDescription] = useState("");
 
   const handleAddEvent = () => {
-    if (!title || !date) {
+    if (!title || !date || !selectedPatientId) {
       return;
     }
 
@@ -48,7 +48,7 @@ const Events = () => {
     eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
 
     addEvent({
-      patient_id: selectedPatientId!,
+      patient_id: selectedPatientId,
       title,
       location,
       event_date: eventDate.toISOString(),
