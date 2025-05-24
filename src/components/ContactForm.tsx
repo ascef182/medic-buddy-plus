@@ -27,7 +27,6 @@ const ContactForm: React.FC = () => {
       email,
       phone,
       relation,
-      patient_id: "", // This will be set in the context
     });
 
     // Reset form

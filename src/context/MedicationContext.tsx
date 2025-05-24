@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -38,6 +37,9 @@ export type MoodEntryType = {
   notes?: string;
   date: Date;
 };
+
+// Export alias for compatibility
+export type MoodEntry = MoodEntryType;
 
 export type PatientProfileType = {
   id: string;
@@ -144,6 +146,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       if (data) {
         setMoodEntries(data.map(entry => ({
           ...entry,
+          mood: entry.mood as MoodType,
           date: new Date(entry.date)
         })));
       }
@@ -195,7 +198,8 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         .from("patient_medications")
         .insert({
           ...medication,
-          patient_id: selectedPatientId
+          patient_id: selectedPatientId,
+          last_taken: medication.last_taken ? medication.last_taken.toISOString() : null
         })
         .select()
         .single();
@@ -217,9 +221,16 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
 
   const updateMedication = async (id: string, updates: Partial<MedicationType>) => {
     try {
+      const updateData = {
+        ...updates,
+        last_taken: updates.last_taken ? updates.last_taken.toISOString() : undefined
+      };
+      // Remove patient_id from updates as it shouldn't be updated
+      delete updateData.patient_id;
+
       const { error } = await supabase
         .from("patient_medications")
-        .update(updates)
+        .update(updateData)
         .eq("id", id);
 
       if (error) throw error;
@@ -329,8 +340,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
 
       if (error) throw error;
       if (data) {
-        const newEntry = {
+        const newEntry: MoodEntryType = {
           ...data,
+          mood: data.mood as MoodType,
           date: new Date(data.date)
         };
         setMoodEntries(prev => [newEntry, ...prev]);
@@ -349,12 +361,15 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
     }
 
     try {
+      const updateData = {
+        ...updates,
+        updated_at: new Date().toISOString(),
+        created_at: updates.created_at ? updates.created_at.toISOString() : undefined
+      };
+
       const { data, error } = await supabase
         .from("patients")
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq("id", selectedPatientId)
         .select()
         .single();

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +51,6 @@ const AddMedicationForm: React.FC = () => {
       frequency,
       times: times.filter((t) => t), // Remove empty times
       notes,
-      patient_id: null, // This will be set in the context
     });
 
     // Reset form
