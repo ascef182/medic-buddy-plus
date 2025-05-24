@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// Types
+// Enhanced MedicationType with all required fields
 export type MedicationType = {
   id: string;
   patient_id: string;
@@ -17,6 +17,24 @@ export type MedicationType = {
   last_taken?: Date | null;
   alert_threshold?: number;
   auto_alert_contact_id?: string | null;
+  
+  // New fields for enhanced medication management
+  dose_per_intake: number; // Amount consumed per dose (e.g., 1 pill, 5ml)
+  start_date: Date;
+  end_date?: Date | null;
+  expiry_date?: Date | null;
+  is_recurring: boolean; // Continuous medication or temporary treatment
+  stock_alert_threshold: number; // When to alert for low stock
+  restock_history: RestockEntry[];
+};
+
+export type RestockEntry = {
+  id: string;
+  medication_id: string;
+  quantity_added: number;
+  new_expiry_date?: Date | null;
+  restock_date: Date;
+  notes?: string;
 };
 
 export type ContactType = {
@@ -59,9 +77,12 @@ export interface MedicationContextType {
   moodEntries: MoodEntryType[];
   patientProfile: PatientProfileType | null;
   selectedPatientId: string | null;
-  addMedication: (medication: Omit<MedicationType, "id" | "patient_id">) => Promise<void>;
+  addMedication: (medication: Omit<MedicationType, "id" | "patient_id" | "restock_history">) => Promise<void>;
   updateMedication: (id: string, updates: Partial<MedicationType>) => Promise<void>;
   takeMedication: (id: string) => Promise<void>;
+  restockMedication: (id: string, quantity: number, newExpiryDate?: Date, notes?: string) => Promise<void>;
+  getNextDoseTime: (medication: MedicationType) => Date | null;
+  getMedicationStatus: (medication: MedicationType) => 'on_time' | 'low_stock' | 'expiring_soon' | 'overdue' | 'expired';
   addContact: (contact: Omit<ContactType, "id" | "patient_id">) => Promise<void>;
   deleteContact: (id: string) => Promise<void>;
   addMoodEntry: (entry: Omit<MoodEntryType, "id" | "patient_id">) => Promise<void>;
@@ -93,6 +114,67 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
     localStorage.getItem("selectedPatientId")
   );
 
+  // Helper function to calculate next dose time
+  const getNextDoseTime = (medication: MedicationType): Date | null => {
+    if (!medication.last_taken || medication.times.length === 0) {
+      return null;
+    }
+
+    const lastTaken = new Date(medication.last_taken);
+    const today = new Date();
+    
+    // Find next time based on frequency
+    const frequencyHours = parseFrequency(medication.frequency);
+    if (!frequencyHours) return null;
+
+    const nextDose = new Date(lastTaken.getTime() + (frequencyHours * 60 * 60 * 1000));
+    return nextDose;
+  };
+
+  // Helper function to parse frequency into hours
+  const parseFrequency = (frequency: string): number | null => {
+    const freq = frequency.toLowerCase();
+    if (freq.includes('8 horas') || freq.includes('8h')) return 8;
+    if (freq.includes('12 horas') || freq.includes('12h')) return 12;
+    if (freq.includes('24 horas') || freq.includes('1x ao dia') || freq.includes('diário')) return 24;
+    if (freq.includes('2x ao dia')) return 12;
+    if (freq.includes('3x ao dia')) return 8;
+    if (freq.includes('4x ao dia')) return 6;
+    return null;
+  };
+
+  // Helper function to get medication status
+  const getMedicationStatus = (medication: MedicationType): 'on_time' | 'low_stock' | 'expiring_soon' | 'overdue' | 'expired' => {
+    const now = new Date();
+    
+    // Check if expired
+    if (medication.expiry_date && medication.expiry_date < now) {
+      return 'expired';
+    }
+    
+    // Check if expiring soon (7 days)
+    if (medication.expiry_date) {
+      const daysUntilExpiry = Math.ceil((medication.expiry_date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysUntilExpiry <= 7) {
+        return 'expiring_soon';
+      }
+    }
+    
+    // Check if low stock
+    const daysOfStock = Math.floor(medication.quantity / medication.dose_per_intake);
+    if (daysOfStock <= medication.stock_alert_threshold) {
+      return 'low_stock';
+    }
+    
+    // Check if overdue
+    const nextDose = getNextDoseTime(medication);
+    if (nextDose && nextDose < now) {
+      return 'overdue';
+    }
+    
+    return 'on_time';
+  };
+
   const loadMedications = async (patientId: string) => {
     try {
       console.log("Loading medications for patient:", patientId);
@@ -110,7 +192,15 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       if (data) {
         setMedications(data.map(med => ({
           ...med,
-          last_taken: med.last_taken ? new Date(med.last_taken) : null
+          last_taken: med.last_taken ? new Date(med.last_taken) : null,
+          // Set default values for new fields if not present
+          dose_per_intake: med.dose_per_intake || 1,
+          start_date: med.start_date ? new Date(med.start_date) : new Date(),
+          end_date: med.end_date ? new Date(med.end_date) : null,
+          expiry_date: med.expiry_date ? new Date(med.expiry_date) : null,
+          is_recurring: med.is_recurring || false,
+          stock_alert_threshold: med.stock_alert_threshold || 5,
+          restock_history: med.restock_history || []
         })));
       }
     } catch (error: any) {
@@ -187,7 +277,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
     ]);
   };
 
-  const addMedication = async (medication: Omit<MedicationType, "id" | "patient_id">) => {
+  const addMedication = async (medication: Omit<MedicationType, "id" | "patient_id" | "restock_history">) => {
     if (!selectedPatientId) {
       toast.error("Nenhum paciente selecionado");
       return;
@@ -199,7 +289,10 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         .insert({
           ...medication,
           patient_id: selectedPatientId,
-          last_taken: medication.last_taken ? medication.last_taken.toISOString() : null
+          last_taken: medication.last_taken ? medication.last_taken.toISOString() : null,
+          start_date: medication.start_date.toISOString(),
+          end_date: medication.end_date ? medication.end_date.toISOString() : null,
+          expiry_date: medication.expiry_date ? medication.expiry_date.toISOString() : null
         })
         .select()
         .single();
@@ -208,7 +301,11 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       if (data) {
         const newMedication = {
           ...data,
-          last_taken: data.last_taken ? new Date(data.last_taken) : null
+          last_taken: data.last_taken ? new Date(data.last_taken) : null,
+          start_date: new Date(data.start_date),
+          end_date: data.end_date ? new Date(data.end_date) : null,
+          expiry_date: data.expiry_date ? new Date(data.expiry_date) : null,
+          restock_history: []
         };
         setMedications(prev => [...prev, newMedication]);
         toast.success("Medicamento adicionado com sucesso!");
@@ -223,10 +320,13 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
     try {
       const updateData = {
         ...updates,
-        last_taken: updates.last_taken ? updates.last_taken.toISOString() : undefined
+        last_taken: updates.last_taken ? updates.last_taken.toISOString() : undefined,
+        start_date: updates.start_date ? updates.start_date.toISOString() : undefined,
+        end_date: updates.end_date ? updates.end_date.toISOString() : undefined,
+        expiry_date: updates.expiry_date ? updates.expiry_date.toISOString() : undefined
       };
-      // Remove patient_id from updates as it shouldn't be updated
       delete updateData.patient_id;
+      delete updateData.restock_history;
 
       const { error } = await supabase
         .from("patient_medications")
@@ -247,13 +347,17 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
 
   const takeMedication = async (id: string) => {
     try {
+      const medication = medications.find(m => m.id === id);
+      if (!medication) return;
+
       const now = new Date().toISOString();
+      const newQuantity = Math.max(0, medication.quantity - medication.dose_per_intake);
+      
       const { error } = await supabase
         .from("patient_medications")
         .update({ 
           last_taken: now,
-          quantity: medications.find(m => m.id === id)?.quantity ? 
-            Math.max(0, medications.find(m => m.id === id)!.quantity - 1) : 0
+          quantity: newQuantity
         })
         .eq("id", id);
 
@@ -265,7 +369,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
             ? { 
                 ...med, 
                 last_taken: new Date(now),
-                quantity: Math.max(0, med.quantity - 1)
+                quantity: newQuantity
               } 
             : med
         )
@@ -274,6 +378,54 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
     } catch (error: any) {
       console.error("Failed to mark medication as taken:", error);
       toast.error(`Erro ao marcar medicamento: ${error.message}`);
+    }
+  };
+
+  const restockMedication = async (id: string, quantity: number, newExpiryDate?: Date, notes?: string) => {
+    try {
+      const medication = medications.find(m => m.id === id);
+      if (!medication) return;
+
+      const newTotalQuantity = medication.quantity + quantity;
+      const updateData: any = { quantity: newTotalQuantity };
+      
+      if (newExpiryDate) {
+        updateData.expiry_date = newExpiryDate.toISOString();
+      }
+
+      const { error } = await supabase
+        .from("patient_medications")
+        .update(updateData)
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Create restock entry
+      const restockEntry: RestockEntry = {
+        id: Date.now().toString(), // Temporary ID
+        medication_id: id,
+        quantity_added: quantity,
+        new_expiry_date: newExpiryDate || null,
+        restock_date: new Date(),
+        notes
+      };
+
+      setMedications(prev =>
+        prev.map(med => 
+          med.id === id 
+            ? { 
+                ...med, 
+                quantity: newTotalQuantity,
+                expiry_date: newExpiryDate || med.expiry_date,
+                restock_history: [...med.restock_history, restockEntry]
+              } 
+            : med
+        )
+      );
+      toast.success("Medicamento reabastecido com sucesso!");
+    } catch (error: any) {
+      console.error("Failed to restock medication:", error);
+      toast.error(`Erro ao reabastecer medicamento: ${error.message}`);
     }
   };
 
@@ -410,6 +562,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
     addMedication,
     updateMedication,
     takeMedication,
+    restockMedication,
+    getNextDoseTime,
+    getMedicationStatus,
     addContact,
     deleteContact,
     addMoodEntry,
