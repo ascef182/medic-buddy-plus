@@ -1,358 +1,177 @@
 
-import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
-import { toast } from "@/components/ui/sonner";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useMedication } from "@/context/MedicationContext";
-import { useAuth } from "@/context/AuthContext";
+import { toast } from "@/components/ui/sonner";
+import { useMedication } from "./MedicationContext";
 
-export interface Appointment {
+export interface AppointmentType {
   id: string;
+  patient_id: string;
   title: string;
-  doctor: string | null;
-  location: string | null;
+  doctor?: string;
+  location?: string;
   appointment_date: Date;
-  notes: string | null;
-  notification_sent: boolean;
+  notes?: string;
   confirmed: boolean;
+  notification_sent: boolean;
+  created_at: Date;
 }
 
-export interface Exam {
+export interface EventType {
   id: string;
+  patient_id: string;
   title: string;
-  facility: string | null;
-  exam_date: Date;
-  results: string | null;
-  notification_sent: boolean;
-  confirmed: boolean;
-}
-
-export interface PatientEvent {
-  id: string;
-  title: string;
-  location: string | null;
+  location?: string;
   event_date: Date;
-  description: string | null;
-  notification_sent: boolean;
+  description?: string;
   confirmed: boolean;
+  notification_sent: boolean;
+  created_at: Date;
 }
 
 interface AppointmentContextType {
-  appointments: Appointment[];
-  exams: Exam[];
-  events: PatientEvent[];
-  loadAppointments: (patientId: string) => Promise<void>;
-  loadExams: (patientId: string) => Promise<void>;
-  loadEvents: (patientId: string) => Promise<void>;
-  addAppointment: (appointment: Omit<Appointment, "id" | "notification_sent" | "confirmed">, patientId?: string) => Promise<void>;
-  addExam: (exam: Omit<Exam, "id" | "notification_sent" | "confirmed">, patientId?: string) => Promise<void>;
-  addEvent: (event: Omit<PatientEvent, "id" | "notification_sent" | "confirmed">, patientId?: string) => Promise<void>;
-  updateAppointment: (id: string, appointment: Partial<Appointment>) => Promise<void>;
-  updateExam: (id: string, exam: Partial<Exam>) => Promise<void>;
-  updateEvent: (id: string, event: Partial<PatientEvent>) => Promise<void>;
+  appointments: AppointmentType[];
+  events: EventType[];
+  addAppointment: (appointment: Omit<AppointmentType, "id" | "confirmed" | "notification_sent" | "created_at">) => Promise<void>;
+  updateAppointment: (id: string, updates: Partial<AppointmentType>) => Promise<void>;
   deleteAppointment: (id: string) => Promise<void>;
-  deleteExam: (id: string) => Promise<void>;
-  deleteEvent: (id: string) => Promise<void>;
   confirmAppointment: (id: string) => Promise<void>;
-  confirmExam: (id: string) => Promise<void>;
+  addEvent: (event: Omit<EventType, "id" | "confirmed" | "notification_sent" | "created_at">) => Promise<void>;
+  updateEvent: (id: string, updates: Partial<EventType>) => Promise<void>;
+  deleteEvent: (id: string) => Promise<void>;
   confirmEvent: (id: string) => Promise<void>;
+  loading: boolean;
 }
 
 const AppointmentContext = createContext<AppointmentContextType | undefined>(undefined);
 
 export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [exams, setExams] = useState<Exam[]>([]);
-  const [events, setEvents] = useState<PatientEvent[]>([]);
+  const [appointments, setAppointments] = useState<AppointmentType[]>([]);
+  const [events, setEvents] = useState<EventType[]>([]);
+  const [loading, setLoading] = useState(false);
   const { selectedPatientId } = useMedication();
-  const { user } = useAuth();
 
-  // Load appointments for the selected patient
-  const loadAppointments = async (patientId: string) => {
+  // Load appointments and events when patient changes
+  useEffect(() => {
+    if (selectedPatientId) {
+      loadAppointments();
+      loadEvents();
+    } else {
+      setAppointments([]);
+      setEvents([]);
+    }
+  }, [selectedPatientId]);
+
+  const loadAppointments = async () => {
+    if (!selectedPatientId) return;
+    
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from("patient_appointments")
         .select("*")
-        .eq("patient_id", patientId)
+        .eq("patient_id", selectedPatientId)
         .order("appointment_date", { ascending: true });
 
       if (error) throw error;
 
-      if (data) {
-        setAppointments(data.map(apt => ({
-          ...apt,
-          appointment_date: new Date(apt.appointment_date),
-        })));
-      }
+      const formattedAppointments: AppointmentType[] = data.map(item => ({
+        ...item,
+        appointment_date: new Date(item.appointment_date),
+        created_at: new Date(item.created_at),
+      }));
+
+      setAppointments(formattedAppointments);
     } catch (error: any) {
       toast.error(`Erro ao carregar consultas: ${error.message}`);
-      console.error("Error loading appointments:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Load exams for the selected patient
-  const loadExams = async (patientId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("patient_exams")
-        .select("*")
-        .eq("patient_id", patientId)
-        .order("exam_date", { ascending: true });
-
-      if (error) throw error;
-
-      if (data) {
-        setExams(data.map(exam => ({
-          ...exam,
-          exam_date: new Date(exam.exam_date),
-        })));
-      }
-    } catch (error: any) {
-      toast.error(`Erro ao carregar exames: ${error.message}`);
-      console.error("Error loading exams:", error);
-    }
-  };
-
-  // Load events for the selected patient
-  const loadEvents = async (patientId: string) => {
+  const loadEvents = async () => {
+    if (!selectedPatientId) return;
+    
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from("patient_events")
         .select("*")
-        .eq("patient_id", patientId)
+        .eq("patient_id", selectedPatientId)
         .order("event_date", { ascending: true });
 
       if (error) throw error;
 
-      if (data) {
-        setEvents(data.map(event => ({
-          ...event,
-          event_date: new Date(event.event_date),
-        })));
-      }
+      const formattedEvents: EventType[] = data.map(item => ({
+        ...item,
+        event_date: new Date(item.event_date),
+        created_at: new Date(item.created_at),
+      }));
+
+      setEvents(formattedEvents);
     } catch (error: any) {
       toast.error(`Erro ao carregar eventos: ${error.message}`);
-      console.error("Error loading events:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Add a new appointment
-  const addAppointment = async (
-    appointment: Omit<Appointment, "id" | "notification_sent" | "confirmed">, 
-    patientId?: string
-  ) => {
-    const pid = patientId || selectedPatientId;
-    if (!pid) {
-      toast.error("Nenhum paciente selecionado");
-      return;
-    }
+  const addAppointment = async (appointmentData: Omit<AppointmentType, "id" | "confirmed" | "notification_sent" | "created_at">) => {
+    if (!selectedPatientId) return;
 
     try {
       const { data, error } = await supabase
         .from("patient_appointments")
         .insert({
-          patient_id: pid,
-          title: appointment.title,
-          doctor: appointment.doctor,
-          location: appointment.location,
-          appointment_date: appointment.appointment_date.toISOString(),
-          notes: appointment.notes
+          ...appointmentData,
+          patient_id: selectedPatientId,
+          appointment_date: appointmentData.appointment_date.toISOString(),
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      setAppointments([...appointments, {
+      const newAppointment: AppointmentType = {
         ...data,
         appointment_date: new Date(data.appointment_date),
-      }]);
-      
+        created_at: new Date(data.created_at),
+      };
+
+      setAppointments(prev => [...prev, newAppointment]);
       toast.success("Consulta adicionada com sucesso!");
     } catch (error: any) {
       toast.error(`Erro ao adicionar consulta: ${error.message}`);
-      console.error("Error adding appointment:", error);
     }
   };
 
-  // Add a new exam
-  const addExam = async (
-    exam: Omit<Exam, "id" | "notification_sent" | "confirmed">, 
-    patientId?: string
-  ) => {
-    const pid = patientId || selectedPatientId;
-    if (!pid) {
-      toast.error("Nenhum paciente selecionado");
-      return;
-    }
-
+  const updateAppointment = async (id: string, updates: Partial<AppointmentType>) => {
     try {
-      const { data, error } = await supabase
-        .from("patient_exams")
-        .insert({
-          patient_id: pid,
-          title: exam.title,
-          facility: exam.facility,
-          exam_date: exam.exam_date.toISOString(),
-          results: exam.results
-        })
-        .select()
-        .single();
+      const updateData = {
+        ...updates,
+        appointment_date: updates.appointment_date?.toISOString(),
+      };
 
-      if (error) throw error;
-
-      setExams([...exams, {
-        ...data,
-        exam_date: new Date(data.exam_date),
-      }]);
-      
-      toast.success("Exame adicionado com sucesso!");
-    } catch (error: any) {
-      toast.error(`Erro ao adicionar exame: ${error.message}`);
-      console.error("Error adding exam:", error);
-    }
-  };
-
-  // Add a new event
-  const addEvent = async (
-    event: Omit<PatientEvent, "id" | "notification_sent" | "confirmed">, 
-    patientId?: string
-  ) => {
-    const pid = patientId || selectedPatientId;
-    if (!pid) {
-      toast.error("Nenhum paciente selecionado");
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from("patient_events")
-        .insert({
-          patient_id: pid,
-          title: event.title,
-          location: event.location,
-          event_date: event.event_date.toISOString(),
-          description: event.description
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setEvents([...events, {
-        ...data,
-        event_date: new Date(data.event_date),
-      }]);
-      
-      toast.success("Evento adicionado com sucesso!");
-    } catch (error: any) {
-      toast.error(`Erro ao adicionar evento: ${error.message}`);
-      console.error("Error adding event:", error);
-    }
-  };
-
-  // Update an appointment
-  const updateAppointment = async (id: string, appointment: Partial<Appointment>) => {
-    try {
-      const updates: any = { ...appointment };
-      
-      // Format date if it exists
-      if (updates.appointment_date instanceof Date) {
-        updates.appointment_date = updates.appointment_date.toISOString();
-      }
-      
       const { error } = await supabase
         .from("patient_appointments")
-        .update(updates)
+        .update(updateData)
         .eq("id", id);
 
       if (error) throw error;
 
-      setAppointments(appointments.map(apt => 
-        apt.id === id 
-          ? { 
-              ...apt, 
-              ...appointment, 
-              appointment_date: appointment.appointment_date || apt.appointment_date 
-            }
-          : apt
-      ));
-      
+      setAppointments(prev =>
+        prev.map(appointment =>
+          appointment.id === id
+            ? { ...appointment, ...updates }
+            : appointment
+        )
+      );
       toast.success("Consulta atualizada com sucesso!");
     } catch (error: any) {
       toast.error(`Erro ao atualizar consulta: ${error.message}`);
-      console.error("Error updating appointment:", error);
     }
   };
 
-  // Update an exam
-  const updateExam = async (id: string, exam: Partial<Exam>) => {
-    try {
-      const updates: any = { ...exam };
-      
-      // Format date if it exists
-      if (updates.exam_date instanceof Date) {
-        updates.exam_date = updates.exam_date.toISOString();
-      }
-      
-      const { error } = await supabase
-        .from("patient_exams")
-        .update(updates)
-        .eq("id", id);
-
-      if (error) throw error;
-
-      setExams(exams.map(ex => 
-        ex.id === id 
-          ? { 
-              ...ex, 
-              ...exam, 
-              exam_date: exam.exam_date || ex.exam_date 
-            }
-          : ex
-      ));
-      
-      toast.success("Exame atualizado com sucesso!");
-    } catch (error: any) {
-      toast.error(`Erro ao atualizar exame: ${error.message}`);
-      console.error("Error updating exam:", error);
-    }
-  };
-
-  // Update an event
-  const updateEvent = async (id: string, event: Partial<PatientEvent>) => {
-    try {
-      const updates: any = { ...event };
-      
-      // Format date if it exists
-      if (updates.event_date instanceof Date) {
-        updates.event_date = updates.event_date.toISOString();
-      }
-      
-      const { error } = await supabase
-        .from("patient_events")
-        .update(updates)
-        .eq("id", id);
-
-      if (error) throw error;
-
-      setEvents(events.map(ev => 
-        ev.id === id 
-          ? { 
-              ...ev, 
-              ...event, 
-              event_date: event.event_date || ev.event_date 
-            }
-          : ev
-      ));
-      
-      toast.success("Evento atualizado com sucesso!");
-    } catch (error: any) {
-      toast.error(`Erro ao atualizar evento: ${error.message}`);
-      console.error("Error updating event:", error);
-    }
-  };
-
-  // Delete an appointment
   const deleteAppointment = async (id: string) => {
     try {
       const { error } = await supabase
@@ -362,33 +181,73 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (error) throw error;
 
-      setAppointments(appointments.filter(apt => apt.id !== id));
+      setAppointments(prev => prev.filter(appointment => appointment.id !== id));
       toast.success("Consulta removida com sucesso!");
     } catch (error: any) {
       toast.error(`Erro ao remover consulta: ${error.message}`);
-      console.error("Error deleting appointment:", error);
     }
   };
 
-  // Delete an exam
-  const deleteExam = async (id: string) => {
+  const confirmAppointment = async (id: string) => {
+    await updateAppointment(id, { confirmed: true });
+  };
+
+  const addEvent = async (eventData: Omit<EventType, "id" | "confirmed" | "notification_sent" | "created_at">) => {
+    if (!selectedPatientId) return;
+
     try {
+      const { data, error } = await supabase
+        .from("patient_events")
+        .insert({
+          ...eventData,
+          patient_id: selectedPatientId,
+          event_date: eventData.event_date.toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newEvent: EventType = {
+        ...data,
+        event_date: new Date(data.event_date),
+        created_at: new Date(data.created_at),
+      };
+
+      setEvents(prev => [...prev, newEvent]);
+      toast.success("Evento adicionado com sucesso!");
+    } catch (error: any) {
+      toast.error(`Erro ao adicionar evento: ${error.message}`);
+    }
+  };
+
+  const updateEvent = async (id: string, updates: Partial<EventType>) => {
+    try {
+      const updateData = {
+        ...updates,
+        event_date: updates.event_date?.toISOString(),
+      };
+
       const { error } = await supabase
-        .from("patient_exams")
-        .delete()
+        .from("patient_events")
+        .update(updateData)
         .eq("id", id);
 
       if (error) throw error;
 
-      setExams(exams.filter(ex => ex.id !== id));
-      toast.success("Exame removido com sucesso!");
+      setEvents(prev =>
+        prev.map(event =>
+          event.id === id
+            ? { ...event, ...updates }
+            : event
+        )
+      );
+      toast.success("Evento atualizado com sucesso!");
     } catch (error: any) {
-      toast.error(`Erro ao remover exame: ${error.message}`);
-      console.error("Error deleting exam:", error);
+      toast.error(`Erro ao atualizar evento: ${error.message}`);
     }
   };
 
-  // Delete an event
   const deleteEvent = async (id: string) => {
     try {
       const { error } = await supabase
@@ -398,124 +257,42 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (error) throw error;
 
-      setEvents(events.filter(ev => ev.id !== id));
+      setEvents(prev => prev.filter(event => event.id !== id));
       toast.success("Evento removido com sucesso!");
     } catch (error: any) {
       toast.error(`Erro ao remover evento: ${error.message}`);
-      console.error("Error deleting event:", error);
     }
   };
 
-  // Confirm an appointment (mark as confirmed)
-  const confirmAppointment = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from("patient_appointments")
-        .update({ confirmed: true })
-        .eq("id", id);
-
-      if (error) throw error;
-
-      setAppointments(appointments.map(apt => 
-        apt.id === id 
-          ? { ...apt, confirmed: true } 
-          : apt
-      ));
-      
-      toast.success("Consulta confirmada!");
-    } catch (error: any) {
-      toast.error(`Erro ao confirmar consulta: ${error.message}`);
-      console.error("Error confirming appointment:", error);
-    }
-  };
-
-  // Confirm an exam (mark as confirmed)
-  const confirmExam = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from("patient_exams")
-        .update({ confirmed: true })
-        .eq("id", id);
-
-      if (error) throw error;
-
-      setExams(exams.map(ex => 
-        ex.id === id 
-          ? { ...ex, confirmed: true } 
-          : ex
-      ));
-      
-      toast.success("Exame confirmado!");
-    } catch (error: any) {
-      toast.error(`Erro ao confirmar exame: ${error.message}`);
-      console.error("Error confirming exam:", error);
-    }
-  };
-
-  // Confirm an event (mark as confirmed)
   const confirmEvent = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from("patient_events")
-        .update({ confirmed: true })
-        .eq("id", id);
-
-      if (error) throw error;
-
-      setEvents(events.map(ev => 
-        ev.id === id 
-          ? { ...ev, confirmed: true } 
-          : ev
-      ));
-      
-      toast.success("Evento confirmado!");
-    } catch (error: any) {
-      toast.error(`Erro ao confirmar evento: ${error.message}`);
-      console.error("Error confirming event:", error);
-    }
+    await updateEvent(id, { confirmed: true });
   };
 
-  // Load all data whenever the selectedPatientId changes
-  useEffect(() => {
-    if (selectedPatientId) {
-      loadAppointments(selectedPatientId);
-      loadExams(selectedPatientId);
-      loadEvents(selectedPatientId);
-    }
-  }, [selectedPatientId]);
+  const value = {
+    appointments,
+    events,
+    addAppointment,
+    updateAppointment,
+    deleteAppointment,
+    confirmAppointment,
+    addEvent,
+    updateEvent,
+    deleteEvent,
+    confirmEvent,
+    loading,
+  };
 
   return (
-    <AppointmentContext.Provider
-      value={{
-        appointments,
-        exams,
-        events,
-        loadAppointments,
-        loadExams,
-        loadEvents,
-        addAppointment,
-        addExam,
-        addEvent,
-        updateAppointment,
-        updateExam,
-        updateEvent,
-        deleteAppointment,
-        deleteExam,
-        deleteEvent,
-        confirmAppointment,
-        confirmExam,
-        confirmEvent
-      }}
-    >
+    <AppointmentContext.Provider value={value}>
       {children}
     </AppointmentContext.Provider>
   );
 };
 
-export const useAppointment = () => {
+export const useAppointment = (): AppointmentContextType => {
   const context = useContext(AppointmentContext);
   if (context === undefined) {
-    throw new Error("useAppointment must be used within a AppointmentProvider");
+    throw new Error("useAppointment must be used within an AppointmentProvider");
   }
   return context;
 };

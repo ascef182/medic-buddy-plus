@@ -13,6 +13,8 @@ import {
   LogOut,
   Users,
   ChartBar,
+  Calendar,
+  CalendarPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -44,125 +46,156 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       title: "Início",
       path: "/",
-      icon: <User className="h-5 w-5" />,
+      icon: <User className="h-4 w-4" />,
     },
     {
       title: "Medicamentos",
       path: "/medicamentos",
-      icon: <Pill className="h-5 w-5" />,
+      icon: <Pill className="h-4 w-4" />,
     },
     {
       title: "Lembretes",
       path: "/lembretes",
-      icon: <Clock className="h-5 w-5" />,
+      icon: <Clock className="h-4 w-4" />,
+    },
+    {
+      title: "Consultas",
+      path: "/consultas",
+      icon: <CalendarPlus className="h-4 w-4" />,
+    },
+    {
+      title: "Eventos",
+      path: "/eventos",
+      icon: <Calendar className="h-4 w-4" />,
     },
     {
       title: "Humor",
       path: "/humor",
-      icon: <FileText className="h-5 w-5" />,
+      icon: <FileText className="h-4 w-4" />,
     },
     {
       title: "Insights",
       path: "/insights",
-      icon: <ChartBar className="h-5 w-5" />,
+      icon: <ChartBar className="h-4 w-4" />,
     },
     {
       title: "Contatos",
       path: "/contatos",
-      icon: <Users className="h-5 w-5" />,
+      icon: <Users className="h-4 w-4" />,
     },
     {
       title: "Perfil Médico",
       path: "/perfil",
-      icon: <FileText className="h-5 w-5" />,
+      icon: <FileText className="h-4 w-4" />,
     },
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 bg-background border-b">
-        <div className="container flex items-center h-16 px-4">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="mr-2 md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72">
-              <div className="flex flex-col h-full">
-                <div className="py-4">
-                  <h2 className="text-lg font-semibold">BuddyDoctor</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Assistente de Cuidados para Idosos
-                  </p>
-                </div>
-                <Separator />
-                <div className="mt-4 mb-4">
-                  <PatientSelector 
-                    selectedPatientId={selectedPatientId} 
-                    onPatientSelect={handlePatientSelect} 
-                  />
-                </div>
-                <Separator />
-                <nav className="flex-1 py-4">
-                  <div className="grid gap-1">
-                    {menuItems.map((item) => (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        onClick={() => setOpen(false)}
-                        className={cn(
-                          "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                          location.pathname === item.path &&
-                            "bg-accent text-accent-foreground font-medium"
-                        )}
-                      >
-                        {item.icon}
-                        {item.title}
-                      </Link>
-                    ))}
-                  </div>
-                </nav>
-                <Separator />
-                <Button
-                  variant="ghost"
-                  className="mt-4 justify-start gap-3"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="h-5 w-5" />
-                  Sair
+      {/* Fixed Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="container flex items-center justify-between h-16 px-4 max-w-full">
+          <div className="flex items-center gap-4">
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="md:hidden">
+                  <Menu className="h-4 w-4" />
+                  <span className="sr-only">Toggle Menu</span>
                 </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <User className="h-6 w-6" />
-            <span className="hidden md:inline-block">BuddyDoctor</span>
-          </Link>
-          <div className="ml-auto flex items-center gap-4">
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72">
+                <div className="flex flex-col h-full">
+                  <div className="py-6">
+                    <h2 className="text-lg font-semibold">BuddyDoctor</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Assistente de Cuidados para Idosos
+                    </p>
+                  </div>
+                  <Separator />
+                  <div className="my-4">
+                    <PatientSelector 
+                      selectedPatientId={selectedPatientId} 
+                      onPatientSelect={handlePatientSelect} 
+                    />
+                  </div>
+                  <Separator />
+                  <nav className="flex-1 py-4">
+                    <div className="space-y-1">
+                      {menuItems.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => setOpen(false)}
+                          className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                            location.pathname === item.path &&
+                              "bg-accent text-accent-foreground"
+                          )}
+                        >
+                          {item.icon}
+                          {item.title}
+                        </Link>
+                      ))}
+                    </div>
+                  </nav>
+                  <Separator />
+                  <div className="pt-4">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-3"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sair
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+            
+            <Link to="/" className="flex items-center gap-2 font-semibold">
+              <User className="h-6 w-6 text-primary" />
+              <span className="hidden sm:inline-block">BuddyDoctor</span>
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-4">
             <div className="hidden md:block">
               <PatientSelector 
                 selectedPatientId={selectedPatientId} 
                 onPatientSelect={handlePatientSelect} 
               />
             </div>
+            <div className="hidden md:block">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+                onClick={handleSignOut}
+              >
+                <LogOut className="h-4 w-4" />
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>
-      <div className="hidden md:flex">
-        <aside className="fixed inset-y-0 left-0 w-64 bg-background border-r pt-16">
-          <div className="flex flex-col h-full py-6 px-4">
+
+      {/* Main Layout */}
+      <div className="pt-16 flex min-h-screen">
+        {/* Desktop Sidebar */}
+        <aside className="hidden md:flex fixed left-0 top-16 bottom-0 w-64 bg-background border-r">
+          <div className="flex flex-col w-full py-6 px-4">
             <nav className="flex-1">
-              <div className="grid gap-1">
+              <div className="space-y-1">
                 {menuItems.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
                     className={cn(
-                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                       location.pathname === item.path &&
-                        "bg-accent text-accent-foreground font-medium"
+                        "bg-accent text-accent-foreground"
                     )}
                   >
                     {item.icon}
@@ -171,24 +204,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 ))}
               </div>
             </nav>
-            <Separator className="my-4" />
-            <Button
-              variant="ghost"
-              className="justify-start gap-3"
-              onClick={handleSignOut}
-            >
-              <LogOut className="h-5 w-5" />
-              Sair
-            </Button>
           </div>
         </aside>
-        <main className="flex-1 pl-64">
-          <div className="container py-6 px-4">{children}</div>
-        </main>
-      </div>
-      <div className="flex md:hidden">
-        <main className="flex-1">
-          <div className="container py-6 px-4">{children}</div>
+
+        {/* Main Content */}
+        <main className="flex-1 md:ml-64">
+          <div className="container mx-auto py-6 px-4 max-w-7xl">
+            {children}
+          </div>
         </main>
       </div>
     </div>
