@@ -58,7 +58,7 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
                 </p>
                 {medication.expiry_date && (
                   <p className="text-xs text-muted-foreground">
-                    Vence: {medication.expiry_date.toLocaleDateString()}
+                    Vence: {new Date(medication.expiry_date).toLocaleDateString()}
                   </p>
                 )}
               </div>

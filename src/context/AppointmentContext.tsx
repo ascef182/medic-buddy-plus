@@ -10,11 +10,11 @@ export type AppointmentType = {
   title: string;
   doctor?: string;
   location?: string;
-  appointment_date: Date;
+  appointment_date: string;
   notes?: string;
   confirmed?: boolean;
   notification_sent?: boolean;
-  created_at?: Date;
+  created_at?: string;
 };
 
 export type EventType = {
@@ -22,23 +22,23 @@ export type EventType = {
   patient_id: string;
   title: string;
   location?: string;
-  event_date: Date;
+  event_date: string;
   description?: string;
   confirmed?: boolean;
   notification_sent?: boolean;
-  created_at?: Date;
+  created_at?: string;
 };
 
 export type ExamType = {
   id: string;
   patient_id: string;
   title: string;
-  exam_date: Date;
+  exam_date: string;
   facility?: string;
   results?: string;
   confirmed?: boolean;
   notification_sent?: boolean;
-  created_at?: Date;
+  created_at?: string;
 };
 
 export interface AppointmentContextType {
@@ -91,8 +91,8 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
       if (data) {
         setAppointments(data.map(appointment => ({
           ...appointment,
-          appointment_date: new Date(appointment.appointment_date),
-          created_at: appointment.created_at ? new Date(appointment.created_at) : undefined
+          appointment_date: appointment.appointment_date,
+          created_at: appointment.created_at || undefined
         })));
       }
     } catch (error: any) {
@@ -113,8 +113,8 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
       if (data) {
         setEvents(data.map(event => ({
           ...event,
-          event_date: new Date(event.event_date),
-          created_at: event.created_at ? new Date(event.created_at) : undefined
+          event_date: event.event_date,
+          created_at: event.created_at || undefined
         })));
       }
     } catch (error: any) {
@@ -135,8 +135,8 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
       if (data) {
         setExams(data.map(exam => ({
           ...exam,
-          exam_date: new Date(exam.exam_date),
-          created_at: exam.created_at ? new Date(exam.created_at) : undefined
+          exam_date: exam.exam_date,
+          created_at: exam.created_at || undefined
         })));
       }
     } catch (error: any) {
@@ -170,7 +170,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
         .insert({
           ...appointment,
           patient_id: selectedPatientId,
-          appointment_date: appointment.appointment_date.toISOString(),
+          appointment_date: appointment.appointment_date,
           created_at: new Date().toISOString()
         })
         .select()
@@ -178,10 +178,10 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
 
       if (error) throw error;
       if (data) {
-        const newAppointment = {
+        const newAppointment: AppointmentType = {
           ...data,
-          appointment_date: new Date(data.appointment_date),
-          created_at: data.created_at ? new Date(data.created_at) : undefined
+          appointment_date: data.appointment_date,
+          created_at: data.created_at || undefined
         };
         setAppointments(prev => [...prev, newAppointment]);
         toast.success("Consulta adicionada com sucesso!");
@@ -194,10 +194,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
 
   const updateAppointment = async (id: string, updates: Partial<AppointmentType>) => {
     try {
-      const updateData = {
-        ...updates,
-        appointment_date: updates.appointment_date ? updates.appointment_date.toISOString() : undefined
-      };
+      const updateData = { ...updates };
       delete updateData.patient_id;
 
       const { error } = await supabase
@@ -266,7 +263,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
         .insert({
           ...event,
           patient_id: selectedPatientId,
-          event_date: event.event_date.toISOString(),
+          event_date: event.event_date,
           created_at: new Date().toISOString()
         })
         .select()
@@ -274,10 +271,10 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
 
       if (error) throw error;
       if (data) {
-        const newEvent = {
+        const newEvent: EventType = {
           ...data,
-          event_date: new Date(data.event_date),
-          created_at: data.created_at ? new Date(data.created_at) : undefined
+          event_date: data.event_date,
+          created_at: data.created_at || undefined
         };
         setEvents(prev => [...prev, newEvent]);
         toast.success("Evento adicionado com sucesso!");
@@ -290,10 +287,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
 
   const updateEvent = async (id: string, updates: Partial<EventType>) => {
     try {
-      const updateData = {
-        ...updates,
-        event_date: updates.event_date ? updates.event_date.toISOString() : undefined
-      };
+      const updateData = { ...updates };
       delete updateData.patient_id;
 
       const { error } = await supabase
@@ -362,7 +356,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
         .insert({
           ...exam,
           patient_id: selectedPatientId,
-          exam_date: exam.exam_date.toISOString(),
+          exam_date: exam.exam_date,
           created_at: new Date().toISOString()
         })
         .select()
@@ -370,10 +364,10 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
 
       if (error) throw error;
       if (data) {
-        const newExam = {
+        const newExam: ExamType = {
           ...data,
-          exam_date: new Date(data.exam_date),
-          created_at: data.created_at ? new Date(data.created_at) : undefined
+          exam_date: data.exam_date,
+          created_at: data.created_at || undefined
         };
         setExams(prev => [...prev, newExam]);
         toast.success("Exame adicionado com sucesso!");
@@ -386,10 +380,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
 
   const updateExam = async (id: string, updates: Partial<ExamType>) => {
     try {
-      const updateData = {
-        ...updates,
-        exam_date: updates.exam_date ? updates.exam_date.toISOString() : undefined
-      };
+      const updateData = { ...updates };
       delete updateData.patient_id;
 
       const { error } = await supabase

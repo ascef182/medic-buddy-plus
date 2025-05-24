@@ -66,7 +66,7 @@ const MedicationStatus: React.FC<MedicationStatusProps> = ({ medication, status 
   // Calculate days until expiry
   const getDaysUntilExpiry = () => {
     if (!medication.expiry_date) return null;
-    const days = Math.ceil((medication.expiry_date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    const days = Math.ceil((new Date(medication.expiry_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
     return days;
   };
 

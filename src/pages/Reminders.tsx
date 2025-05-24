@@ -234,7 +234,7 @@ const Reminders = () => {
                           </p>
                           {medication.expiry_date && (
                             <p className="text-sm text-muted-foreground">
-                              <strong>Validade:</strong> {medication.expiry_date.toLocaleDateString()}
+                              <strong>Validade:</strong> {new Date(medication.expiry_date).toLocaleDateString()}
                             </p>
                           )}
                         </div>

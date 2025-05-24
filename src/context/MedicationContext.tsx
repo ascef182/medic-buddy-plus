@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,15 +15,15 @@ export type MedicationType = {
   quantity: number;
   unit: string;
   times: string[];
-  last_taken?: Date | null;
+  last_taken?: string | null;
   alert_threshold?: number;
   auto_alert_contact_id?: string | null;
   
-  // New fields for enhanced medication management
+  // New fields for enhanced medication management - all as strings for Supabase compatibility
   dose_per_intake: number; // Amount consumed per dose (e.g., 1 pill, 5ml)
-  start_date: Date;
-  end_date?: Date | null;
-  expiry_date?: Date | null;
+  start_date: string;
+  end_date?: string | null;
+  expiry_date?: string | null;
   is_recurring: boolean; // Continuous medication or temporary treatment
   stock_alert_threshold: number; // When to alert for low stock
   restock_history: RestockEntry[];
@@ -32,8 +33,8 @@ export type RestockEntry = {
   id: string;
   medication_id: string;
   quantity_added: number;
-  new_expiry_date?: Date | null;
-  restock_date: Date;
+  new_expiry_date?: string | null;
+  restock_date: string;
   notes?: string;
 };
 
@@ -53,7 +54,7 @@ export type MoodEntryType = {
   patient_id: string;
   mood: MoodType;
   notes?: string;
-  date: Date;
+  date: string;
 };
 
 // Export alias for compatibility
@@ -67,8 +68,8 @@ export type PatientProfileType = {
   blood_type?: string;
   email?: string;
   password?: boolean;
-  created_at?: Date;
-  updated_at?: Date;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export interface MedicationContextType {
@@ -148,13 +149,13 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
     const now = new Date();
     
     // Check if expired
-    if (medication.expiry_date && medication.expiry_date < now) {
+    if (medication.expiry_date && new Date(medication.expiry_date) < now) {
       return 'expired';
     }
     
     // Check if expiring soon (7 days)
     if (medication.expiry_date) {
-      const daysUntilExpiry = Math.ceil((medication.expiry_date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntilExpiry = Math.ceil((new Date(medication.expiry_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
       if (daysUntilExpiry <= 7) {
         return 'expiring_soon';
       }
@@ -192,12 +193,11 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       if (data) {
         setMedications(data.map(med => ({
           ...med,
-          last_taken: med.last_taken ? new Date(med.last_taken) : null,
           // Set default values for new fields if not present
           dose_per_intake: med.dose_per_intake || 1,
-          start_date: med.start_date ? new Date(med.start_date) : new Date(),
-          end_date: med.end_date ? new Date(med.end_date) : null,
-          expiry_date: med.expiry_date ? new Date(med.expiry_date) : null,
+          start_date: med.start_date || new Date().toISOString(),
+          end_date: med.end_date || null,
+          expiry_date: med.expiry_date || null,
           is_recurring: med.is_recurring || false,
           stock_alert_threshold: med.stock_alert_threshold || 5,
           restock_history: med.restock_history || []
@@ -237,7 +237,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         setMoodEntries(data.map(entry => ({
           ...entry,
           mood: entry.mood as MoodType,
-          date: new Date(entry.date)
+          date: entry.date
         })));
       }
     } catch (error: any) {
@@ -258,8 +258,8 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       if (data) {
         setPatientProfile({
           ...data,
-          created_at: data.created_at ? new Date(data.created_at) : undefined,
-          updated_at: data.updated_at ? new Date(data.updated_at) : undefined
+          created_at: data.created_at || undefined,
+          updated_at: data.updated_at || undefined
         });
       }
     } catch (error: any) {
@@ -289,22 +289,18 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         .insert({
           ...medication,
           patient_id: selectedPatientId,
-          last_taken: medication.last_taken ? medication.last_taken.toISOString() : null,
-          start_date: medication.start_date.toISOString(),
-          end_date: medication.end_date ? medication.end_date.toISOString() : null,
-          expiry_date: medication.expiry_date ? medication.expiry_date.toISOString() : null
+          last_taken: medication.last_taken || null,
+          start_date: medication.start_date,
+          end_date: medication.end_date || null,
+          expiry_date: medication.expiry_date || null
         })
         .select()
         .single();
 
       if (error) throw error;
       if (data) {
-        const newMedication = {
+        const newMedication: MedicationType = {
           ...data,
-          last_taken: data.last_taken ? new Date(data.last_taken) : null,
-          start_date: new Date(data.start_date),
-          end_date: data.end_date ? new Date(data.end_date) : null,
-          expiry_date: data.expiry_date ? new Date(data.expiry_date) : null,
           restock_history: []
         };
         setMedications(prev => [...prev, newMedication]);
@@ -318,13 +314,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
 
   const updateMedication = async (id: string, updates: Partial<MedicationType>) => {
     try {
-      const updateData = {
-        ...updates,
-        last_taken: updates.last_taken ? updates.last_taken.toISOString() : undefined,
-        start_date: updates.start_date ? updates.start_date.toISOString() : undefined,
-        end_date: updates.end_date ? updates.end_date.toISOString() : undefined,
-        expiry_date: updates.expiry_date ? updates.expiry_date.toISOString() : undefined
-      };
+      const updateData = { ...updates };
       delete updateData.patient_id;
       delete updateData.restock_history;
 
@@ -368,7 +358,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
           med.id === id 
             ? { 
                 ...med, 
-                last_taken: new Date(now),
+                last_taken: now,
                 quantity: newQuantity
               } 
             : med
@@ -405,8 +395,8 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         id: Date.now().toString(), // Temporary ID
         medication_id: id,
         quantity_added: quantity,
-        new_expiry_date: newExpiryDate || null,
-        restock_date: new Date(),
+        new_expiry_date: newExpiryDate ? newExpiryDate.toISOString() : null,
+        restock_date: new Date().toISOString(),
         notes
       };
 
@@ -416,7 +406,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
             ? { 
                 ...med, 
                 quantity: newTotalQuantity,
-                expiry_date: newExpiryDate || med.expiry_date,
+                expiry_date: newExpiryDate ? newExpiryDate.toISOString() : med.expiry_date,
                 restock_history: [...med.restock_history, restockEntry]
               } 
             : med
@@ -485,7 +475,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         .insert({
           ...entry,
           patient_id: selectedPatientId,
-          date: entry.date.toISOString()
+          date: entry.date
         })
         .select()
         .single();
@@ -495,7 +485,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         const newEntry: MoodEntryType = {
           ...data,
           mood: data.mood as MoodType,
-          date: new Date(data.date)
+          date: data.date
         };
         setMoodEntries(prev => [newEntry, ...prev]);
         toast.success("Entrada de humor registrada!");
@@ -516,7 +506,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       const updateData = {
         ...updates,
         updated_at: new Date().toISOString(),
-        created_at: updates.created_at ? updates.created_at.toISOString() : undefined
+        created_at: updates.created_at || undefined
       };
 
       const { data, error } = await supabase
@@ -530,8 +520,8 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       if (data) {
         setPatientProfile({
           ...data,
-          created_at: data.created_at ? new Date(data.created_at) : undefined,
-          updated_at: data.updated_at ? new Date(data.updated_at) : undefined
+          created_at: data.created_at || undefined,
+          updated_at: data.updated_at || undefined
         });
         toast.success("Perfil atualizado com sucesso!");
       }
