@@ -30,10 +30,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       (event, session) => {
         if (event === 'SIGNED_IN') {
           toast.success('Login realizado com sucesso!');
+          // Redirect to saved URL or home page
+          const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
+          sessionStorage.removeItem("redirectAfterLogin");
+          navigate(redirectPath);
         } else if (event === 'SIGNED_OUT') {
           toast.info('Logout realizado com sucesso!');
           // Clear localStorage patient selection on logout
           localStorage.removeItem("selectedPatientId");
+          navigate("/auth");
         } else if (event === 'PASSWORD_RECOVERY') {
           // Redirect to password reset form
           navigate('/auth/reset-password');

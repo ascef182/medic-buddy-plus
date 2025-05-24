@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -92,7 +91,7 @@ const Auth: React.FC = () => {
         }
         
         toast.success("Login realizado com sucesso!");
-        navigate("/dashboard");
+        navigate("/");
       } else if (mode === AuthMode.SIGNUP) {
         // Sign up
         const { data, error } = await supabase.auth.signUp({
@@ -158,7 +157,7 @@ const Auth: React.FC = () => {
       
       toast.success("Autenticação de dois fatores concluída com sucesso!");
       setShowOtpDialog(false);
-      navigate("/dashboard");
+      navigate("/");
     } catch (error: any) {
       toast.error(`Erro: ${error.message || "Código OTP inválido"}`);
     } finally {
