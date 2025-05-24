@@ -65,6 +65,7 @@ interface MedicationContextType {
   addMoodEntry: (entry: Omit<MoodEntry, "id" | "patient_id">) => Promise<void>;
   patientProfile: PatientProfileType | null;
   loadPatientData: (patientId: string) => Promise<void>;
+  updatePatientProfile: (updates: Partial<PatientProfileType>) => Promise<void>;
 }
 
 const MedicationContext = createContext<MedicationContextType | undefined>(
@@ -134,7 +135,12 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
       if (moodError) {
         console.error("Error fetching mood entries:", moodError);
       } else {
-        setMoodEntries(moodData || []);
+        // Type cast the mood entries to ensure proper typing
+        const typedMoodData = moodData?.map(entry => ({
+          ...entry,
+          mood: entry.mood as MoodType
+        })) || [];
+        setMoodEntries(typedMoodData);
       }
     } catch (error) {
       console.error("Error loading patient data:", error);
@@ -352,6 +358,29 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
     }
   };
 
+  const updatePatientProfile = async (updates: Partial<PatientProfileType>) => {
+    if (!selectedPatientId) return;
+
+    try {
+      const { error } = await supabase
+        .from("patients")
+        .update(updates)
+        .eq("id", selectedPatientId);
+
+      if (error) {
+        console.error("Error updating patient profile:", error);
+        toast.error("Erro ao atualizar perfil do paciente");
+        return;
+      }
+
+      toast.success("Perfil atualizado com sucesso");
+      await loadPatientData(selectedPatientId);
+    } catch (error) {
+      console.error("Error updating patient profile:", error);
+      toast.error("Erro ao atualizar perfil do paciente");
+    }
+  };
+
   return (
     <MedicationContext.Provider
       value={{
@@ -370,6 +399,7 @@ export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children
         addMoodEntry,
         patientProfile,
         loadPatientData,
+        updatePatientProfile,
       }}
     >
       {children}

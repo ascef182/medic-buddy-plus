@@ -1,179 +1,111 @@
-
-import { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { PlusCircle, Clock, User, ChartBar } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar, ListChecks, BarChartBig, Users } from "lucide-react";
 import Layout from "@/components/layout/Layout";
-import MedicationCard from "@/components/MedicationCard";
-import MoodTracker from "@/components/MoodTracker";
 import { useMedication } from "@/context/MedicationContext";
-import { useAuth } from "@/context/AuthContext";
-import { toast } from "@/components/ui/sonner";
 
 const Index = () => {
-  const { medications, patientProfile, selectedPatientId, setSelectedPatientId } = useMedication();
-  const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const currentDate = new Date().toLocaleDateString('pt-BR', { 
-    weekday: 'long', 
-    day: 'numeric', 
-    month: 'long' 
-  });
-
-  const [greeting, setGreeting] = useState("Olá");
-  
-  useEffect(() => {
-    // Define saudação baseada no horário atual
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) setGreeting("Bom dia");
-    else if (hour >= 12 && hour < 18) setGreeting("Boa tarde");
-    else setGreeting("Boa noite");
-    
-    // Redirecionar para o dashboard se estiver na raiz
-    if (window.location.pathname === "/") {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [navigate]);
-
-  const handleAddMedication = () => {
-    if (!selectedPatientId) {
-      toast.error("Selecione um paciente primeiro");
-      return;
-    }
-    navigate("/medicamentos/adicionar");
-  };
-  
-  const handleManageContacts = () => {
-    if (!selectedPatientId) {
-      toast.error("Selecione um paciente primeiro");
-      return;
-    }
-    navigate("/contatos");
-  };
-  
-  const handleEditProfile = () => {
-    if (!selectedPatientId) {
-      toast.error("Selecione um paciente primeiro");
-      return;
-    }
-    navigate("/perfil");
-  };
+  const { patientProfile } = useMedication();
 
   return (
     <Layout>
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-3xl font-bold">
-              {user ? `${greeting}, ${user.email?.split('@')[0]}!` : `${greeting}!`}
-            </h2>
-            <p className="text-muted-foreground">
-              <span className="capitalize">{currentDate}</span>
-            </p>
-          </div>
-          <div className="flex items-center text-muted-foreground">
-            <Clock className="mr-2" />
-            <span>{currentTime}</span>
-          </div>
-        </div>
-      </div>
+      {patientProfile && (
+        <p className="text-muted-foreground mb-6">
+          Bem-vindo(a), {patientProfile.full_name}!
+        </p>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <Card className="md:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Medicamentos para Hoje</CardTitle>
-            <Button variant="outline" size="sm" onClick={() => navigate("/medicamentos")}>
-              Ver Todos
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {selectedPatientId ? (
-              medications.length > 0 ? (
-                <div>
-                  {medications.slice(0, 3).map((medication) => (
-                    <MedicationCard key={medication.id} medication={medication} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-muted-foreground mb-4">
-                    Nenhum medicamento cadastrado para este paciente
-                  </p>
-                  <Button
-                    onClick={handleAddMedication}
-                  >
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Adicionar Medicamento
-                  </Button>
-                </div>
-              )
-            ) : (
-              <div className="text-center py-6">
-                <p className="text-muted-foreground mb-4">
-                  Selecione um paciente para ver seus medicamentos
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <div>
-          {selectedPatientId ? (
-            <MoodTracker />
-          ) : (
-            <Card>
+      <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
+        {patientProfile?.full_name && (
+          <>
+            <Card className="shadow">
               <CardHeader>
-                <CardTitle className="text-center">Como você está se sentindo?</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <ListChecks className="h-4 w-4 mr-2" />
+                  Medicamentos
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-center text-muted-foreground mb-4">
-                  Selecione um paciente para registrar seu humor
+                <p className="text-sm text-muted-foreground">
+                  Acompanhe seus medicamentos diários
                 </p>
+                <Button
+                  variant="secondary"
+                  className="mt-4 w-full"
+                  onClick={() => navigate("/medicamentos")}
+                >
+                  Ver Medicamentos
+                </Button>
               </CardContent>
             </Card>
-          )}
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Button
-          variant="outline"
-          className="h-24 flex flex-col items-center justify-center"
-          onClick={handleAddMedication}
-        >
-          <PlusCircle className="h-6 w-6 mb-2" />
-          <span>Adicionar Medicamento</span>
-        </Button>
-        
-        <Button
-          variant="outline"
-          className="h-24 flex flex-col items-center justify-center"
-          onClick={handleManageContacts}
-        >
-          <PlusCircle className="h-6 w-6 mb-2" />
-          <span>Gerenciar Contatos</span>
-        </Button>
+            <Card className="shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Consultas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Gerencie suas consultas e compromissos
+                </p>
+                <Button
+                  variant="secondary"
+                  className="mt-4 w-full"
+                  onClick={() => navigate("/consultas")}
+                >
+                  Ver Consultas
+                </Button>
+              </CardContent>
+            </Card>
 
-        <Button
-          variant={patientProfile?.fullName ? "outline" : "default"}
-          className="h-24 flex flex-col items-center justify-center"
-          onClick={handleEditProfile}
-        >
-          <User className="h-6 w-6 mb-2" />
-          <span>{patientProfile?.fullName ? "Editar Ficha Médica" : "Criar Ficha Médica"}</span>
-        </Button>
-        
-        <Button
-          variant="outline"
-          className="h-24 flex flex-col items-center justify-center"
-          onClick={() => selectedPatientId ? navigate("/insights") : toast.error("Selecione um paciente primeiro")}
-        >
-          <ChartBar className="h-6 w-6 mb-2" />
-          <span>Insights e Análises</span>
-        </Button>
+            <Card className="shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChartBig className="h-4 w-4 mr-2" />
+                  Insights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Acompanhe seu histórico e bem-estar
+                </p>
+                <Button
+                  variant="secondary"
+                  className="mt-4 w-full"
+                  onClick={() => navigate("/insights")}
+                >
+                  Ver Insights
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-4 w-4 mr-2" />
+                  Contatos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Adicione e gerencie seus contatos
+                </p>
+                <Button
+                  variant="secondary"
+                  className="mt-4 w-full"
+                  onClick={() => navigate("/contatos")}
+                >
+                  Ver Contatos
+                </Button>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
     </Layout>
   );
