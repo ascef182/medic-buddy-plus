@@ -1,416 +1,411 @@
 
-import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
-import { toast } from "sonner";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
+// Types
 export type MedicationType = {
   id: string;
-  created_at?: string;
-  user_id?: string;
+  patient_id: string;
   name: string;
   dosage: string;
   frequency: string;
   type: string;
-  notes: string | null;
-  patient_id: string | null;
+  notes?: string;
   quantity: number;
   unit: string;
   times: string[];
-  last_taken?: string | null;
+  last_taken?: Date | null;
   alert_threshold?: number;
   auto_alert_contact_id?: string | null;
 };
 
 export type ContactType = {
   id: string;
+  patient_id: string;
   name: string;
   relation: string;
-  email: string | null;
-  phone: string | null;
-  patient_id: string;
+  email?: string;
+  phone?: string;
 };
 
 export type MoodType = "happy" | "neutral" | "sad" | "anxious" | "afraid" | "tense" | "nervous" | "depressed";
 
-export type MoodEntry = {
+export type MoodEntryType = {
   id: string;
-  date: Date | string;
-  mood: MoodType;
-  notes: string | null;
   patient_id: string;
+  mood: MoodType;
+  notes?: string;
+  date: Date;
 };
 
 export type PatientProfileType = {
   id: string;
+  caregiver_id: string;
   full_name: string;
   age?: string;
   blood_type?: string;
   email?: string;
+  password?: boolean;
+  created_at?: Date;
+  updated_at?: Date;
 };
 
-interface MedicationContextType {
+export interface MedicationContextType {
   medications: MedicationType[];
-  addMedication: (medication: Omit<MedicationType, "id" | "user_id" | "created_at">) => Promise<void>;
-  fetchMedications: () => Promise<void>;
-  deleteMedication: (id: string) => Promise<void>;
-  updateMedication: (id: string, updates: Partial<Omit<MedicationType, "id" | "user_id" | "created_at">>) => Promise<void>;
-  selectedPatientId: string | null;
-  setSelectedPatientId: (patientId: string | null) => void;
-  takeMedication: (id: string) => Promise<void>;
   contacts: ContactType[];
-  addContact: (contact: Omit<ContactType, "id">) => Promise<void>;
-  deleteContact: (id: string) => Promise<void>;
-  moodEntries: MoodEntry[];
-  addMoodEntry: (entry: Omit<MoodEntry, "id" | "patient_id">) => Promise<void>;
+  moodEntries: MoodEntryType[];
   patientProfile: PatientProfileType | null;
-  loadPatientData: (patientId: string) => Promise<void>;
+  selectedPatientId: string | null;
+  addMedication: (medication: Omit<MedicationType, "id" | "patient_id">) => Promise<void>;
+  updateMedication: (id: string, updates: Partial<MedicationType>) => Promise<void>;
+  takeMedication: (id: string) => Promise<void>;
+  addContact: (contact: Omit<ContactType, "id" | "patient_id">) => Promise<void>;
+  deleteContact: (id: string) => Promise<void>;
+  addMoodEntry: (entry: Omit<MoodEntryType, "id" | "patient_id">) => Promise<void>;
   updatePatientProfile: (updates: Partial<PatientProfileType>) => Promise<void>;
+  setSelectedPatientId: (id: string | null) => void;
+  loadPatientData: (patientId: string) => Promise<void>;
 }
 
-const MedicationContext = createContext<MedicationContextType | undefined>(
-  undefined
-);
+const MedicationContext = createContext<MedicationContextType | undefined>(undefined);
 
-export const MedicationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const useMedication = () => {
+  const context = useContext(MedicationContext);
+  if (!context) {
+    throw new Error('useMedication must be used within a MedicationProvider');
+  }
+  return context;
+};
+
+interface MedicationProviderProps {
+  children: ReactNode;
+}
+
+export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children }) => {
   const [medications, setMedications] = useState<MedicationType[]>([]);
   const [contacts, setContacts] = useState<ContactType[]>([]);
-  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
+  const [moodEntries, setMoodEntries] = useState<MoodEntryType[]>([]);
   const [patientProfile, setPatientProfile] = useState<PatientProfileType | null>(null);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
     localStorage.getItem("selectedPatientId")
   );
-  const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchMedications();
-      if (selectedPatientId) {
-        loadPatientData(selectedPatientId);
-      }
-    }
-  }, [user, selectedPatientId]);
-
-  useEffect(() => {
-    localStorage.setItem("selectedPatientId", selectedPatientId || "");
-  }, [selectedPatientId]);
-
-  const loadPatientData = async (patientId: string) => {
-    if (!user) return;
-
+  const loadMedications = async (patientId: string) => {
     try {
-      // Fetch patient profile
-      const { data: patientData, error: patientError } = await supabase
-        .from("patients")
+      console.log("Loading medications for patient:", patientId);
+      const { data, error } = await supabase
+        .from("patient_medications")
         .select("*")
-        .eq("id", patientId)
-        .single();
+        .eq("patient_id", patientId);
 
-      if (patientError) {
-        console.error("Error fetching patient profile:", patientError);
-        return;
+      if (error) {
+        console.error("Error fetching medications:", error);
+        throw error;
       }
 
-      setPatientProfile(patientData);
+      console.log("Medications fetched:", data);
+      if (data) {
+        setMedications(data.map(med => ({
+          ...med,
+          last_taken: med.last_taken ? new Date(med.last_taken) : null
+        })));
+      }
+    } catch (error: any) {
+      console.error("Failed to load medications:", error);
+      toast.error(`Erro ao carregar medicamentos: ${error.message}`);
+    }
+  };
 
-      // Fetch contacts
-      const { data: contactsData, error: contactsError } = await supabase
+  const loadContacts = async (patientId: string) => {
+    try {
+      const { data, error } = await supabase
         .from("patient_contacts")
         .select("*")
         .eq("patient_id", patientId);
 
-      if (contactsError) {
-        console.error("Error fetching contacts:", contactsError);
-      } else {
-        setContacts(contactsData || []);
-      }
+      if (error) throw error;
+      if (data) setContacts(data);
+    } catch (error: any) {
+      console.error("Failed to load contacts:", error);
+      toast.error(`Erro ao carregar contatos: ${error.message}`);
+    }
+  };
 
-      // Fetch mood entries
-      const { data: moodData, error: moodError } = await supabase
+  const loadMoodEntries = async (patientId: string) => {
+    try {
+      const { data, error } = await supabase
         .from("patient_mood_entries")
         .select("*")
         .eq("patient_id", patientId)
         .order("date", { ascending: false });
 
-      if (moodError) {
-        console.error("Error fetching mood entries:", moodError);
-      } else {
-        // Type cast the mood entries to ensure proper typing
-        const typedMoodData = moodData?.map(entry => ({
+      if (error) throw error;
+      if (data) {
+        setMoodEntries(data.map(entry => ({
           ...entry,
-          mood: entry.mood as MoodType
-        })) || [];
-        setMoodEntries(typedMoodData);
+          date: new Date(entry.date)
+        })));
       }
-    } catch (error) {
-      console.error("Error loading patient data:", error);
-      toast.error("Erro ao carregar dados do paciente");
+    } catch (error: any) {
+      console.error("Failed to load mood entries:", error);
+      toast.error(`Erro ao carregar entradas de humor: ${error.message}`);
     }
   };
 
-  const fetchMedications = async () => {
-    if (!user) return;
-
+  const loadPatientProfile = async (patientId: string) => {
     try {
-      let query = supabase
-        .from("patient_medications")
+      const { data, error } = await supabase
+        .from("patients")
         .select("*")
+        .eq("id", patientId)
+        .single();
 
-      if (selectedPatientId) {
-        query = query.eq("patient_id", selectedPatientId);
+      if (error) throw error;
+      if (data) {
+        setPatientProfile({
+          ...data,
+          created_at: data.created_at ? new Date(data.created_at) : undefined,
+          updated_at: data.updated_at ? new Date(data.updated_at) : undefined
+        });
       }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error("Error fetching medications:", error);
-        toast.error("Erro ao buscar medicamentos");
-        return;
-      }
-
-      setMedications(data || []);
-    } catch (error) {
-      console.error("Error fetching medications:", error);
-      toast.error("Erro ao buscar medicamentos");
+    } catch (error: any) {
+      console.error("Failed to load patient profile:", error);
+      toast.error(`Erro ao carregar perfil do paciente: ${error.message}`);
     }
   };
 
-  const addMedication = async (medicationData: Omit<MedicationType, "id" | "user_id" | "created_at">) => {
-    if (!user || !selectedPatientId) return;
+  const loadPatientData = async (patientId: string) => {
+    await Promise.all([
+      loadMedications(patientId),
+      loadContacts(patientId),
+      loadMoodEntries(patientId),
+      loadPatientProfile(patientId)
+    ]);
+  };
+
+  const addMedication = async (medication: Omit<MedicationType, "id" | "patient_id">) => {
+    if (!selectedPatientId) {
+      toast.error("Nenhum paciente selecionado");
+      return;
+    }
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("patient_medications")
-        .insert([{
-          ...medicationData,
+        .insert({
+          ...medication,
           patient_id: selectedPatientId
-        }]);
+        })
+        .select()
+        .single();
 
-      if (error) {
-        console.error("Error adding medication:", error);
-        toast.error("Erro ao adicionar medicamento");
-        return;
+      if (error) throw error;
+      if (data) {
+        const newMedication = {
+          ...data,
+          last_taken: data.last_taken ? new Date(data.last_taken) : null
+        };
+        setMedications(prev => [...prev, newMedication]);
+        toast.success("Medicamento adicionado com sucesso!");
       }
-      
-      toast.success("Medicamento adicionado com sucesso");
-      await fetchMedications();
-    } catch (error) {
-      console.error("Error adding medication:", error);
-      toast.error("Erro ao adicionar medicamento");
+    } catch (error: any) {
+      console.error("Failed to add medication:", error);
+      toast.error(`Erro ao adicionar medicamento: ${error.message}`);
     }
   };
 
-  const updateMedication = async (id: string, updates: Partial<Omit<MedicationType, "id" | "user_id" | "created_at">>) => {
+  const updateMedication = async (id: string, updates: Partial<MedicationType>) => {
     try {
       const { error } = await supabase
         .from("patient_medications")
         .update(updates)
         .eq("id", id);
 
-      if (error) {
-        console.error("Error updating medication:", error);
-        toast.error("Erro ao atualizar medicamento");
-        return;
-      }
+      if (error) throw error;
 
-      toast.success("Medicamento atualizado com sucesso");
-      await fetchMedications();
-    } catch (error) {
-      console.error("Error updating medication:", error);
-      toast.error("Erro ao atualizar medicamento");
-    }
-  };
-
-  const deleteMedication = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from("patient_medications")
-        .delete()
-        .eq("id", id);
-
-      if (error) {
-        console.error("Error deleting medication:", error);
-        toast.error("Erro ao remover medicamento");
-        return;
-      }
-
-      toast.success("Medicamento removido com sucesso");
-      await fetchMedications();
-    } catch (error) {
-      console.error("Error deleting medication:", error);
-      toast.error("Erro ao remover medicamento");
+      setMedications(prev =>
+        prev.map(med => med.id === id ? { ...med, ...updates } : med)
+      );
+      toast.success("Medicamento atualizado com sucesso!");
+    } catch (error: any) {
+      console.error("Failed to update medication:", error);
+      toast.error(`Erro ao atualizar medicamento: ${error.message}`);
     }
   };
 
   const takeMedication = async (id: string) => {
     try {
-      // First get the current medication to update quantity
-      const { data, error: fetchError } = await supabase
-        .from("patient_medications")
-        .select("*")
-        .eq("id", id)
-        .single();
-      
-      if (fetchError || !data) {
-        console.error("Error fetching medication:", fetchError);
-        toast.error("Erro ao registrar medicamento como tomado");
-        return;
-      }
-
-      // Decrease quantity by 1
-      const newQuantity = Math.max(0, (data.quantity || 0) - 1);
-      
+      const now = new Date().toISOString();
       const { error } = await supabase
         .from("patient_medications")
-        .update({
-          last_taken: new Date().toISOString(),
-          quantity: newQuantity
+        .update({ 
+          last_taken: now,
+          quantity: medications.find(m => m.id === id)?.quantity ? 
+            Math.max(0, medications.find(m => m.id === id)!.quantity - 1) : 0
         })
         .eq("id", id);
 
-      if (error) {
-        console.error("Error marking medication as taken:", error);
-        toast.error("Erro ao registrar medicamento como tomado");
-        return;
-      }
+      if (error) throw error;
 
-      toast.success("Medicamento registrado como tomado");
-      await fetchMedications();
-    } catch (error) {
-      console.error("Error marking medication as taken:", error);
-      toast.error("Erro ao registrar medicamento como tomado");
+      setMedications(prev =>
+        prev.map(med => 
+          med.id === id 
+            ? { 
+                ...med, 
+                last_taken: new Date(now),
+                quantity: Math.max(0, med.quantity - 1)
+              } 
+            : med
+        )
+      );
+      toast.success("Medicamento marcado como tomado!");
+    } catch (error: any) {
+      console.error("Failed to mark medication as taken:", error);
+      toast.error(`Erro ao marcar medicamento: ${error.message}`);
     }
   };
 
-  const addContact = async (contactData: Omit<ContactType, "id">) => {
-    if (!user || !selectedPatientId) return;
+  const addContact = async (contact: Omit<ContactType, "id" | "patient_id">) => {
+    if (!selectedPatientId) {
+      toast.error("Nenhum paciente selecionado");
+      return;
+    }
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("patient_contacts")
-        .insert([{
-          ...contactData,
+        .insert({
+          ...contact,
           patient_id: selectedPatientId
-        }]);
+        })
+        .select()
+        .single();
 
-      if (error) {
-        console.error("Error adding contact:", error);
-        toast.error("Erro ao adicionar contato");
-        return;
+      if (error) throw error;
+      if (data) {
+        setContacts(prev => [...prev, data]);
+        toast.success("Contato adicionado com sucesso!");
       }
-      
-      toast.success("Contato adicionado com sucesso");
-      await loadPatientData(selectedPatientId);
-    } catch (error) {
-      console.error("Error adding contact:", error);
-      toast.error("Erro ao adicionar contato");
+    } catch (error: any) {
+      console.error("Failed to add contact:", error);
+      toast.error(`Erro ao adicionar contato: ${error.message}`);
     }
   };
 
   const deleteContact = async (id: string) => {
-    if (!selectedPatientId) return;
-    
     try {
       const { error } = await supabase
         .from("patient_contacts")
         .delete()
         .eq("id", id);
 
-      if (error) {
-        console.error("Error deleting contact:", error);
-        toast.error("Erro ao remover contato");
-        return;
-      }
+      if (error) throw error;
 
-      toast.success("Contato removido com sucesso");
-      await loadPatientData(selectedPatientId);
-    } catch (error) {
-      console.error("Error deleting contact:", error);
-      toast.error("Erro ao remover contato");
+      setContacts(prev => prev.filter(contact => contact.id !== id));
+      toast.success("Contato removido com sucesso!");
+    } catch (error: any) {
+      console.error("Failed to delete contact:", error);
+      toast.error(`Erro ao remover contato: ${error.message}`);
     }
   };
 
-  const addMoodEntry = async (entryData: Omit<MoodEntry, "id" | "patient_id">) => {
-    if (!user || !selectedPatientId) return;
+  const addMoodEntry = async (entry: Omit<MoodEntryType, "id" | "patient_id">) => {
+    if (!selectedPatientId) {
+      toast.error("Nenhum paciente selecionado");
+      return;
+    }
 
     try {
-      const entry = {
-        ...entryData,
-        patient_id: selectedPatientId,
-        date: new Date(entryData.date).toISOString()
-      };
-
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("patient_mood_entries")
-        .insert([entry]);
+        .insert({
+          ...entry,
+          patient_id: selectedPatientId,
+          date: entry.date.toISOString()
+        })
+        .select()
+        .single();
 
-      if (error) {
-        console.error("Error adding mood entry:", error);
-        toast.error("Erro ao registrar humor");
-        return;
+      if (error) throw error;
+      if (data) {
+        const newEntry = {
+          ...data,
+          date: new Date(data.date)
+        };
+        setMoodEntries(prev => [newEntry, ...prev]);
+        toast.success("Entrada de humor registrada!");
       }
-      
-      toast.success("Humor registrado com sucesso");
-      await loadPatientData(selectedPatientId);
-    } catch (error) {
-      console.error("Error adding mood entry:", error);
-      toast.error("Erro ao registrar humor");
+    } catch (error: any) {
+      console.error("Failed to add mood entry:", error);
+      toast.error(`Erro ao registrar humor: ${error.message}`);
     }
   };
 
   const updatePatientProfile = async (updates: Partial<PatientProfileType>) => {
-    if (!selectedPatientId) return;
+    if (!selectedPatientId) {
+      toast.error("Nenhum paciente selecionado");
+      return;
+    }
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("patients")
-        .update(updates)
-        .eq("id", selectedPatientId);
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", selectedPatientId)
+        .select()
+        .single();
 
-      if (error) {
-        console.error("Error updating patient profile:", error);
-        toast.error("Erro ao atualizar perfil do paciente");
-        return;
+      if (error) throw error;
+      if (data) {
+        setPatientProfile({
+          ...data,
+          created_at: data.created_at ? new Date(data.created_at) : undefined,
+          updated_at: data.updated_at ? new Date(data.updated_at) : undefined
+        });
+        toast.success("Perfil atualizado com sucesso!");
       }
-
-      toast.success("Perfil atualizado com sucesso");
-      await loadPatientData(selectedPatientId);
-    } catch (error) {
-      console.error("Error updating patient profile:", error);
-      toast.error("Erro ao atualizar perfil do paciente");
+    } catch (error: any) {
+      console.error("Failed to update patient profile:", error);
+      toast.error(`Erro ao atualizar perfil: ${error.message}`);
     }
   };
 
+  // Load data when selectedPatientId changes
+  useEffect(() => {
+    if (selectedPatientId) {
+      loadPatientData(selectedPatientId);
+    } else {
+      setMedications([]);
+      setContacts([]);
+      setMoodEntries([]);
+      setPatientProfile(null);
+    }
+  }, [selectedPatientId]);
+
+  const value: MedicationContextType = {
+    medications,
+    contacts,
+    moodEntries,
+    patientProfile,
+    selectedPatientId,
+    addMedication,
+    updateMedication,
+    takeMedication,
+    addContact,
+    deleteContact,
+    addMoodEntry,
+    updatePatientProfile,
+    setSelectedPatientId,
+    loadPatientData
+  };
+
   return (
-    <MedicationContext.Provider
-      value={{
-        medications,
-        addMedication,
-        fetchMedications,
-        deleteMedication,
-        updateMedication,
-        selectedPatientId,
-        setSelectedPatientId,
-        takeMedication,
-        contacts,
-        addContact,
-        deleteContact,
-        moodEntries,
-        addMoodEntry,
-        patientProfile,
-        loadPatientData,
-        updatePatientProfile,
-      }}
-    >
+    <MedicationContext.Provider value={value}>
       {children}
     </MedicationContext.Provider>
   );
-};
-
-export const useMedication = () => {
-  const context = useContext(MedicationContext);
-  if (!context) {
-    throw new Error("useMedication must be used within a MedicationProvider");
-  }
-  return context;
 };

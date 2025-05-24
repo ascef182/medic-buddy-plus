@@ -15,7 +15,7 @@ export type Database = {
           alert_sent: boolean | null
           alert_time: string
           confirmed: boolean | null
-          created_at: string
+          created_at: string | null
           id: string
           medication_id: string
           patient_id: string
@@ -25,7 +25,7 @@ export type Database = {
           alert_sent?: boolean | null
           alert_time: string
           confirmed?: boolean | null
-          created_at?: string
+          created_at?: string | null
           id?: string
           medication_id: string
           patient_id: string
@@ -35,7 +35,7 @@ export type Database = {
           alert_sent?: boolean | null
           alert_time?: string
           confirmed?: boolean | null
-          created_at?: string
+          created_at?: string | null
           id?: string
           medication_id?: string
           patient_id?: string
@@ -94,7 +94,7 @@ export type Database = {
         Row: {
           appointment_date: string
           confirmed: boolean | null
-          created_at: string
+          created_at: string | null
           doctor: string | null
           id: string
           location: string | null
@@ -106,7 +106,7 @@ export type Database = {
         Insert: {
           appointment_date: string
           confirmed?: boolean | null
-          created_at?: string
+          created_at?: string | null
           doctor?: string | null
           id?: string
           location?: string | null
@@ -118,7 +118,7 @@ export type Database = {
         Update: {
           appointment_date?: string
           confirmed?: boolean | null
-          created_at?: string
+          created_at?: string | null
           doctor?: string | null
           id?: string
           location?: string | null
@@ -258,7 +258,7 @@ export type Database = {
       }
       patient_emergency_signals: {
         Row: {
-          created_at: string
+          created_at: string | null
           id: string
           location: string | null
           message: string | null
@@ -267,7 +267,7 @@ export type Database = {
           resolved_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           location?: string | null
           message?: string | null
@@ -276,7 +276,7 @@ export type Database = {
           resolved_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           location?: string | null
           message?: string | null
@@ -292,19 +292,12 @@ export type Database = {
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "patient_emergency_signals_patient_id_fkey1"
-            columns: ["patient_id"]
-            isOneToOne: false
-            referencedRelation: "patients"
-            referencedColumns: ["id"]
-          },
         ]
       }
       patient_events: {
         Row: {
           confirmed: boolean | null
-          created_at: string
+          created_at: string | null
           description: string | null
           event_date: string
           id: string
@@ -315,7 +308,7 @@ export type Database = {
         }
         Insert: {
           confirmed?: boolean | null
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           event_date: string
           id?: string
@@ -326,7 +319,7 @@ export type Database = {
         }
         Update: {
           confirmed?: boolean | null
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           event_date?: string
           id?: string
@@ -348,7 +341,7 @@ export type Database = {
       patient_exams: {
         Row: {
           confirmed: boolean | null
-          created_at: string
+          created_at: string | null
           exam_date: string
           facility: string | null
           id: string
@@ -359,7 +352,7 @@ export type Database = {
         }
         Insert: {
           confirmed?: boolean | null
-          created_at?: string
+          created_at?: string | null
           exam_date: string
           facility?: string | null
           id?: string
@@ -370,7 +363,7 @@ export type Database = {
         }
         Update: {
           confirmed?: boolean | null
-          created_at?: string
+          created_at?: string | null
           exam_date?: string
           facility?: string | null
           id?: string
@@ -415,8 +408,8 @@ export type Database = {
           name: string
           notes?: string | null
           patient_id: string
-          quantity: number
-          times: string[]
+          quantity?: number
+          times?: string[]
           type: string
           unit: string
         }
@@ -437,7 +430,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "patient_medications_auto_alert_contact_id_fkey"
+            foreignKeyName: "fk_auto_alert_contact"
             columns: ["auto_alert_contact_id"]
             isOneToOne: false
             referencedRelation: "patient_contacts"
@@ -454,21 +447,21 @@ export type Database = {
       }
       patient_mood_entries: {
         Row: {
-          date: string
+          date: string | null
           id: string
           mood: string
           notes: string | null
           patient_id: string
         }
         Insert: {
-          date?: string
+          date?: string | null
           id?: string
           mood: string
           notes?: string | null
           patient_id: string
         }
         Update: {
-          date?: string
+          date?: string | null
           id?: string
           mood?: string
           notes?: string | null
@@ -515,44 +508,36 @@ export type Database = {
           age: string | null
           blood_type: string | null
           caregiver_id: string
-          created_at: string
+          created_at: string | null
           email: string | null
           full_name: string
           id: string
           password: boolean | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           age?: string | null
           blood_type?: string | null
           caregiver_id: string
-          created_at?: string
+          created_at?: string | null
           email?: string | null
           full_name: string
           id?: string
           password?: boolean | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           age?: string | null
           blood_type?: string | null
           caregiver_id?: string
-          created_at?: string
+          created_at?: string | null
           email?: string | null
           full_name?: string
           id?: string
           password?: boolean | null
-          updated_at?: string
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "patients_caregiver_id_fkey"
-            columns: ["caregiver_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_settings: {
         Row: {
