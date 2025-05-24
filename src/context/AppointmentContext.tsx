@@ -29,9 +29,22 @@ export interface EventType {
   created_at: Date;
 }
 
+export interface ExamType {
+  id: string;
+  patient_id: string;
+  title: string;
+  facility?: string;
+  exam_date: Date;
+  results?: string;
+  confirmed: boolean;
+  notification_sent: boolean;
+  created_at: Date;
+}
+
 interface AppointmentContextType {
   appointments: AppointmentType[];
   events: EventType[];
+  exams: ExamType[];
   addAppointment: (appointment: Omit<AppointmentType, "id" | "confirmed" | "notification_sent" | "created_at">) => Promise<void>;
   updateAppointment: (id: string, updates: Partial<AppointmentType>) => Promise<void>;
   deleteAppointment: (id: string) => Promise<void>;
@@ -40,6 +53,10 @@ interface AppointmentContextType {
   updateEvent: (id: string, updates: Partial<EventType>) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   confirmEvent: (id: string) => Promise<void>;
+  addExam: (exam: Omit<ExamType, "id" | "confirmed" | "notification_sent" | "created_at">) => Promise<void>;
+  updateExam: (id: string, updates: Partial<ExamType>) => Promise<void>;
+  deleteExam: (id: string) => Promise<void>;
+  confirmExam: (id: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -48,17 +65,20 @@ const AppointmentContext = createContext<AppointmentContextType | undefined>(und
 export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [appointments, setAppointments] = useState<AppointmentType[]>([]);
   const [events, setEvents] = useState<EventType[]>([]);
+  const [exams, setExams] = useState<ExamType[]>([]);
   const [loading, setLoading] = useState(false);
   const { selectedPatientId } = useMedication();
 
-  // Load appointments and events when patient changes
+  // Load data when patient changes
   useEffect(() => {
     if (selectedPatientId) {
       loadAppointments();
       loadEvents();
+      loadExams();
     } else {
       setAppointments([]);
       setEvents([]);
+      setExams([]);
     }
   }, [selectedPatientId]);
 
@@ -111,6 +131,33 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       setEvents(formattedEvents);
     } catch (error: any) {
       toast.error(`Erro ao carregar eventos: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadExams = async () => {
+    if (!selectedPatientId) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("patient_exams")
+        .select("*")
+        .eq("patient_id", selectedPatientId)
+        .order("exam_date", { ascending: true });
+
+      if (error) throw error;
+
+      const formattedExams: ExamType[] = data.map(item => ({
+        ...item,
+        exam_date: new Date(item.exam_date),
+        created_at: new Date(item.created_at),
+      }));
+
+      setExams(formattedExams);
+    } catch (error: any) {
+      toast.error(`Erro ao carregar exames: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -268,9 +315,86 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     await updateEvent(id, { confirmed: true });
   };
 
+  const addExam = async (examData: Omit<ExamType, "id" | "confirmed" | "notification_sent" | "created_at">) => {
+    if (!selectedPatientId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("patient_exams")
+        .insert({
+          ...examData,
+          patient_id: selectedPatientId,
+          exam_date: examData.exam_date.toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newExam: ExamType = {
+        ...data,
+        exam_date: new Date(data.exam_date),
+        created_at: new Date(data.created_at),
+      };
+
+      setExams(prev => [...prev, newExam]);
+      toast.success("Exame adicionado com sucesso!");
+    } catch (error: any) {
+      toast.error(`Erro ao adicionar exame: ${error.message}`);
+    }
+  };
+
+  const updateExam = async (id: string, updates: Partial<ExamType>) => {
+    try {
+      const updateData = {
+        ...updates,
+        exam_date: updates.exam_date?.toISOString(),
+      };
+
+      const { error } = await supabase
+        .from("patient_exams")
+        .update(updateData)
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setExams(prev =>
+        prev.map(exam =>
+          exam.id === id
+            ? { ...exam, ...updates }
+            : exam
+        )
+      );
+      toast.success("Exame atualizado com sucesso!");
+    } catch (error: any) {
+      toast.error(`Erro ao atualizar exame: ${error.message}`);
+    }
+  };
+
+  const deleteExam = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("patient_exams")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setExams(prev => prev.filter(exam => exam.id !== id));
+      toast.success("Exame removido com sucesso!");
+    } catch (error: any) {
+      toast.error(`Erro ao remover exame: ${error.message}`);
+    }
+  };
+
+  const confirmExam = async (id: string) => {
+    await updateExam(id, { confirmed: true });
+  };
+
   const value = {
     appointments,
     events,
+    exams,
     addAppointment,
     updateAppointment,
     deleteAppointment,
@@ -279,6 +403,10 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     updateEvent,
     deleteEvent,
     confirmEvent,
+    addExam,
+    updateExam,
+    deleteExam,
+    confirmExam,
     loading,
   };
 

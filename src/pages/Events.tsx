@@ -49,6 +49,7 @@ const Events = () => {
     eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
 
     addEvent({
+      patient_id: selectedPatientId!,
       title,
       location,
       event_date: eventDate,

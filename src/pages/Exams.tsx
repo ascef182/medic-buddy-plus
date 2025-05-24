@@ -49,6 +49,7 @@ const Exams = () => {
     examDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
 
     addExam({
+      patient_id: selectedPatientId!,
       title,
       facility,
       exam_date: examDate,

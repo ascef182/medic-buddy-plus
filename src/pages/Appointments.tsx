@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -50,6 +49,7 @@ const Appointments = () => {
     appointmentDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
 
     addAppointment({
+      patient_id: selectedPatientId!,
       title,
       doctor,
       location,

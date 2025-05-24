@@ -15,6 +15,7 @@ import {
   ChartBar,
   Calendar,
   CalendarPlus,
+  Stethoscope,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -62,6 +63,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       title: "Consultas",
       path: "/consultas",
       icon: <CalendarPlus className="h-4 w-4" />,
+    },
+    {
+      title: "Exames",
+      path: "/exames",
+      icon: <Stethoscope className="h-4 w-4" />,
     },
     {
       title: "Eventos",
