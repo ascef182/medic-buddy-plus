@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -52,7 +51,7 @@ const Events = () => {
       patient_id: selectedPatientId!,
       title,
       location,
-      event_date: eventDate,
+      event_date: eventDate.toISOString(),
       description
     });
 
@@ -70,7 +69,8 @@ const Events = () => {
 
   // Group events by month/year
   const groupedEvents = events.reduce((acc, event) => {
-    const monthYear = format(event.event_date, 'MMMM yyyy', { locale: ptBR });
+    const eventDate = new Date(event.event_date);
+    const monthYear = format(eventDate, 'MMMM yyyy', { locale: ptBR });
     if (!acc[monthYear]) {
       acc[monthYear] = [];
     }
@@ -81,7 +81,7 @@ const Events = () => {
   // Sort events within each month by date
   Object.keys(groupedEvents).forEach(monthYear => {
     groupedEvents[monthYear].sort((a, b) => 
-      a.event_date.getTime() - b.event_date.getTime()
+      new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
     );
   });
 
@@ -92,8 +92,8 @@ const Events = () => {
     return dateA.getTime() - dateB.getTime();
   });
 
-  const isUpcoming = (date: Date) => date > new Date();
-  const isPast = (date: Date) => date < new Date();
+  const isUpcoming = (date: string) => new Date(date) > new Date();
+  const isPast = (date: string) => new Date(date) < new Date();
 
   return (
     <Layout>
@@ -199,6 +199,7 @@ const Events = () => {
               <h2 className="text-lg font-medium capitalize">{monthYear}</h2>
               
               {groupedEvents[monthYear].map((event) => {
+                const eventDate = new Date(event.event_date);
                 const isUpcomingEvent = isUpcoming(event.event_date);
                 const isPastEvent = isPast(event.event_date);
                 
@@ -229,11 +230,11 @@ const Events = () => {
                           <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                             <p className="flex items-center">
                               <CalendarIcon className="h-4 w-4 mr-2" />
-                              {format(event.event_date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                              {format(eventDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                             </p>
                             <p className="flex items-center">
                               <Clock className="h-4 w-4 mr-2" />
-                              {format(event.event_date, "HH:mm")}
+                              {format(eventDate, "HH:mm")}
                             </p>
                             {event.location && (
                               <p className="flex items-center">

@@ -387,13 +387,20 @@ export type Database = {
           alert_threshold: number | null
           auto_alert_contact_id: string | null
           dosage: string
+          dose_per_intake: number | null
+          end_date: string | null
+          expiry_date: string | null
           frequency: string
           id: string
+          is_recurring: boolean | null
           last_taken: string | null
           name: string
           notes: string | null
           patient_id: string
           quantity: number
+          restock_history: Json | null
+          start_date: string | null
+          stock_alert_threshold: number | null
           times: string[]
           type: string
           unit: string
@@ -402,13 +409,20 @@ export type Database = {
           alert_threshold?: number | null
           auto_alert_contact_id?: string | null
           dosage: string
+          dose_per_intake?: number | null
+          end_date?: string | null
+          expiry_date?: string | null
           frequency: string
           id?: string
+          is_recurring?: boolean | null
           last_taken?: string | null
           name: string
           notes?: string | null
           patient_id: string
           quantity?: number
+          restock_history?: Json | null
+          start_date?: string | null
+          stock_alert_threshold?: number | null
           times?: string[]
           type: string
           unit: string
@@ -417,13 +431,20 @@ export type Database = {
           alert_threshold?: number | null
           auto_alert_contact_id?: string | null
           dosage?: string
+          dose_per_intake?: number | null
+          end_date?: string | null
+          expiry_date?: string | null
           frequency?: string
           id?: string
+          is_recurring?: boolean | null
           last_taken?: string | null
           name?: string
           notes?: string | null
           patient_id?: string
           quantity?: number
+          restock_history?: Json | null
+          start_date?: string | null
+          stock_alert_threshold?: number | null
           times?: string[]
           type?: string
           unit?: string
@@ -447,6 +468,7 @@ export type Database = {
       }
       patient_mood_entries: {
         Row: {
+          created_at: string | null
           date: string | null
           id: string
           mood: string
@@ -454,6 +476,7 @@ export type Database = {
           patient_id: string
         }
         Insert: {
+          created_at?: string | null
           date?: string | null
           id?: string
           mood: string
@@ -461,6 +484,7 @@ export type Database = {
           patient_id: string
         }
         Update: {
+          created_at?: string | null
           date?: string | null
           id?: string
           mood?: string

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,9 +72,9 @@ const AddMedicationForm: React.FC = () => {
       times: times.filter((t) => t),
       notes,
       dose_per_intake: Number(dosePerIntake),
-      start_date: startDate,
-      end_date: endDate,
-      expiry_date: expiryDate,
+      start_date: startDate.toISOString().split('T')[0],
+      end_date: endDate ? endDate.toISOString().split('T')[0] : null,
+      expiry_date: expiryDate ? expiryDate.toISOString().split('T')[0] : null,
       is_recurring: isRecurring,
       stock_alert_threshold: Number(stockAlertThreshold),
     });

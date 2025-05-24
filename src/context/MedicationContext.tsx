@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -193,9 +192,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       if (data) {
         setMedications(data.map(med => ({
           ...med,
-          // Set default values for new fields if not present
+          // Ensure all required fields are present with proper defaults
           dose_per_intake: med.dose_per_intake || 1,
-          start_date: med.start_date || new Date().toISOString(),
+          start_date: med.start_date || new Date().toISOString().split('T')[0],
           end_date: med.end_date || null,
           expiry_date: med.expiry_date || null,
           is_recurring: med.is_recurring || false,
@@ -380,7 +379,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       const updateData: any = { quantity: newTotalQuantity };
       
       if (newExpiryDate) {
-        updateData.expiry_date = newExpiryDate.toISOString();
+        updateData.expiry_date = newExpiryDate.toISOString().split('T')[0];
       }
 
       const { error } = await supabase
@@ -392,10 +391,10 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
 
       // Create restock entry
       const restockEntry: RestockEntry = {
-        id: Date.now().toString(), // Temporary ID
+        id: Date.now().toString(),
         medication_id: id,
         quantity_added: quantity,
-        new_expiry_date: newExpiryDate ? newExpiryDate.toISOString() : null,
+        new_expiry_date: newExpiryDate ? newExpiryDate.toISOString().split('T')[0] : null,
         restock_date: new Date().toISOString(),
         notes
       };
@@ -406,7 +405,7 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
             ? { 
                 ...med, 
                 quantity: newTotalQuantity,
-                expiry_date: newExpiryDate ? newExpiryDate.toISOString() : med.expiry_date,
+                expiry_date: newExpiryDate ? newExpiryDate.toISOString().split('T')[0] : med.expiry_date,
                 restock_history: [...med.restock_history, restockEntry]
               } 
             : med

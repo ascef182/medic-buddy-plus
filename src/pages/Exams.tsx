@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -52,7 +51,7 @@ const Exams = () => {
       patient_id: selectedPatientId!,
       title,
       facility,
-      exam_date: examDate,
+      exam_date: examDate.toISOString(),
       results
     });
 
@@ -70,7 +69,8 @@ const Exams = () => {
 
   // Group exams by month/year
   const groupedExams = exams.reduce((acc, exam) => {
-    const monthYear = format(exam.exam_date, 'MMMM yyyy', { locale: ptBR });
+    const examDate = new Date(exam.exam_date);
+    const monthYear = format(examDate, 'MMMM yyyy', { locale: ptBR });
     if (!acc[monthYear]) {
       acc[monthYear] = [];
     }
@@ -81,7 +81,7 @@ const Exams = () => {
   // Sort exams within each month by date
   Object.keys(groupedExams).forEach(monthYear => {
     groupedExams[monthYear].sort((a, b) => 
-      a.exam_date.getTime() - b.exam_date.getTime()
+      new Date(a.exam_date).getTime() - new Date(b.exam_date).getTime()
     );
   });
 
@@ -92,8 +92,8 @@ const Exams = () => {
     return dateA.getTime() - dateB.getTime();
   });
 
-  const isUpcoming = (date: Date) => date > new Date();
-  const isPast = (date: Date) => date < new Date();
+  const isUpcoming = (date: string) => new Date(date) > new Date();
+  const isPast = (date: string) => new Date(date) < new Date();
 
   return (
     <Layout>
@@ -199,6 +199,7 @@ const Exams = () => {
               <h2 className="text-lg font-medium capitalize">{monthYear}</h2>
               
               {groupedExams[monthYear].map((exam) => {
+                const examDate = new Date(exam.exam_date);
                 const isUpcomingExam = isUpcoming(exam.exam_date);
                 const isPastExam = isPast(exam.exam_date);
                 
@@ -229,11 +230,11 @@ const Exams = () => {
                           <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                             <p className="flex items-center">
                               <Calendar className="h-4 w-4 mr-2" />
-                              {format(exam.exam_date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                              {format(examDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                             </p>
                             <p className="flex items-center">
                               <Clock className="h-4 w-4 mr-2" />
-                              {format(exam.exam_date, "HH:mm")}
+                              {format(examDate, "HH:mm")}
                             </p>
                             {exam.facility && (
                               <p className="flex items-center">

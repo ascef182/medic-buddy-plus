@@ -13,7 +13,7 @@ const MoodTracker: React.FC = () => {
   const handleSubmit = () => {
     if (selectedMood) {
       addMoodEntry({
-        date: new Date(),
+        date: new Date().toISOString(),
         mood: selectedMood,
         notes,
       });

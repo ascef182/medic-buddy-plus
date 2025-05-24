@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, User, Check, X, Plus, CalendarPlus } from "lucide-react";
+import { Calendar, Clock, MapPin, User, Check, X, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -53,7 +53,7 @@ const Appointments = () => {
       title,
       doctor,
       location,
-      appointment_date: appointmentDate,
+      appointment_date: appointmentDate.toISOString(),
       notes
     });
 
@@ -72,7 +72,8 @@ const Appointments = () => {
 
   // Group appointments by month/year
   const groupedAppointments = appointments.reduce((acc, appointment) => {
-    const monthYear = format(appointment.appointment_date, 'MMMM yyyy', { locale: ptBR });
+    const appointmentDate = new Date(appointment.appointment_date);
+    const monthYear = format(appointmentDate, 'MMMM yyyy', { locale: ptBR });
     if (!acc[monthYear]) {
       acc[monthYear] = [];
     }
@@ -83,7 +84,7 @@ const Appointments = () => {
   // Sort appointments within each month by date
   Object.keys(groupedAppointments).forEach(monthYear => {
     groupedAppointments[monthYear].sort((a, b) => 
-      a.appointment_date.getTime() - b.appointment_date.getTime()
+      new Date(a.appointment_date).getTime() - new Date(b.appointment_date).getTime()
     );
   });
 
@@ -94,36 +95,36 @@ const Appointments = () => {
     return dateA.getTime() - dateB.getTime();
   });
 
-  const isUpcoming = (date: Date) => date > new Date();
-  const isPast = (date: Date) => date < new Date();
+  const isUpcoming = (date: string) => new Date(date) > new Date();
+  const isPast = (date: string) => new Date(date) < new Date();
 
   return (
     <Layout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Consultas Médicas</h1>
+        <h1 className="text-2xl font-bold">Consultas</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Adicionar Consulta
+              Agendar Consulta
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Adicionar Nova Consulta</DialogTitle>
+              <DialogTitle>Agendar Nova Consulta</DialogTitle>
               <DialogDescription>
-                Preencha os detalhes da consulta médica.
+                Preencha os detalhes da consulta.
               </DialogDescription>
             </DialogHeader>
             
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="title">Título</Label>
+                <Label htmlFor="title">Título da Consulta</Label>
                 <Input
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Ex: Consulta com cardiologista"
+                  placeholder="Ex: Consulta de Rotina"
                 />
               </div>
               
@@ -133,7 +134,7 @@ const Appointments = () => {
                   id="doctor"
                   value={doctor}
                   onChange={(e) => setDoctor(e.target.value)}
-                  placeholder="Ex: Dr. Silva"
+                  placeholder="Ex: Dr. João Silva"
                 />
               </div>
               
@@ -143,7 +144,7 @@ const Appointments = () => {
                   id="location"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Ex: Hospital São Lucas, sala 302"
+                  placeholder="Ex: Clínica São Paulo"
                 />
               </div>
               
@@ -191,14 +192,14 @@ const Appointments = () => {
                   id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Informações adicionais sobre a consulta..."
+                  placeholder="Observações sobre a consulta..."
                 />
               </div>
             </div>
             
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button onClick={handleAddAppointment}>Adicionar Consulta</Button>
+              <Button onClick={handleAddAppointment}>Agendar Consulta</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -211,6 +212,7 @@ const Appointments = () => {
               <h2 className="text-lg font-medium capitalize">{monthYear}</h2>
               
               {groupedAppointments[monthYear].map((appointment) => {
+                const appointmentDate = new Date(appointment.appointment_date);
                 const isUpcomingAppointment = isUpcoming(appointment.appointment_date);
                 const isPastAppointment = isPast(appointment.appointment_date);
                 
@@ -229,7 +231,7 @@ const Appointments = () => {
                       <div className="flex justify-between items-start">
                         <div>
                           <div className="flex items-center gap-2">
-                            <CalendarPlus className="h-5 w-5 text-primary" />
+                            <Calendar className="h-5 w-5 text-primary" />
                             <h3 className="font-medium">{appointment.title}</h3>
                             {appointment.confirmed && (
                               <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
@@ -241,11 +243,11 @@ const Appointments = () => {
                           <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                             <p className="flex items-center">
                               <Calendar className="h-4 w-4 mr-2" />
-                              {format(appointment.appointment_date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                              {format(appointmentDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                             </p>
                             <p className="flex items-center">
                               <Clock className="h-4 w-4 mr-2" />
-                              {format(appointment.appointment_date, "HH:mm")}
+                              {format(appointmentDate, "HH:mm")}
                             </p>
                             {appointment.doctor && (
                               <p className="flex items-center">
@@ -297,17 +299,17 @@ const Appointments = () => {
           ))
         ) : (
           <div className="text-center py-10">
-            <CalendarPlus className="h-12 w-12 mx-auto text-muted-foreground" />
+            <Calendar className="h-12 w-12 mx-auto text-muted-foreground" />
             <h3 className="mt-4 text-lg font-medium">Nenhuma consulta agendada</h3>
             <p className="mt-2 text-muted-foreground">
-              Adicione consultas médicas para o paciente para acompanhar os agendamentos.
+              Agende uma consulta para o paciente para começar.
             </p>
             <Button 
               onClick={() => setOpen(true)}
               className="mt-4"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Adicionar Primeira Consulta
+              Agendar Primeira Consulta
             </Button>
           </div>
         )}
