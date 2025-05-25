@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
@@ -89,7 +90,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const addAppointment = async (appointment: CreateAppointmentType) => {
     try {
       const { data, error } = await supabase
-        .from("appointments")
+        .from("patient_appointments")
         .insert([appointment])
         .select("*");
 
@@ -98,7 +99,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       }
 
       if (data && data.length > 0) {
-        setAppointments(prevAppointments => [...prevAppointments, data[0]]);
+        setAppointments(prevAppointments => [...prevAppointments, data[0] as AppointmentType]);
         toast.success('Consulta adicionada com sucesso!');
       }
     } catch (error: any) {
@@ -109,7 +110,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const addEvent = async (event: CreateEventType) => {
     try {
       const { data, error } = await supabase
-        .from("events")
+        .from("patient_events")
         .insert([event])
         .select("*");
 
@@ -118,7 +119,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       }
 
       if (data && data.length > 0) {
-        setEvents(prevEvents => [...prevEvents, data[0]]);
+        setEvents(prevEvents => [...prevEvents, data[0] as EventType]);
         toast.success('Evento adicionado com sucesso!');
       }
     } catch (error: any) {
@@ -129,7 +130,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const addExam = async (exam: CreateExamType) => {
     try {
       const { data, error } = await supabase
-        .from("exams")
+        .from("patient_exams")
         .insert([exam])
         .select("*");
 
@@ -138,7 +139,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       }
 
       if (data && data.length > 0) {
-        setExams(prevExams => [...prevExams, data[0]]);
+        setExams(prevExams => [...prevExams, data[0] as ExamType]);
         toast.success('Exame adicionado com sucesso!');
       }
     } catch (error: any) {
@@ -149,7 +150,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const updateAppointment = async (id: string, updates: Partial<AppointmentType>) => {
     try {
       const { data, error } = await supabase
-        .from("appointments")
+        .from("patient_appointments")
         .update(updates)
         .eq("id", id)
         .select("*");
@@ -160,7 +161,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (data && data.length > 0) {
         setAppointments(prevAppointments =>
-          prevAppointments.map(appointment => (appointment.id === id ? data[0] : appointment))
+          prevAppointments.map(appointment => (appointment.id === id ? data[0] as AppointmentType : appointment))
         );
         toast.success('Consulta atualizada com sucesso!');
       }
@@ -172,7 +173,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const updateEvent = async (id: string, updates: Partial<EventType>) => {
     try {
       const { data, error } = await supabase
-        .from("events")
+        .from("patient_events")
         .update(updates)
         .eq("id", id)
         .select("*");
@@ -183,7 +184,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (data && data.length > 0) {
         setEvents(prevEvents =>
-          prevEvents.map(event => (event.id === id ? data[0] : event))
+          prevEvents.map(event => (event.id === id ? data[0] as EventType : event))
         );
         toast.success('Evento atualizado com sucesso!');
       }
@@ -195,7 +196,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const updateExam = async (id: string, updates: Partial<ExamType>) => {
     try {
       const { data, error } = await supabase
-        .from("exams")
+        .from("patient_exams")
         .update(updates)
         .eq("id", id)
         .select("*");
@@ -206,7 +207,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (data && data.length > 0) {
         setExams(prevExams =>
-          prevExams.map(exam => (exam.id === id ? data[0] : exam))
+          prevExams.map(exam => (exam.id === id ? data[0] as ExamType : exam))
         );
         toast.success('Exame atualizado com sucesso!');
       }
@@ -218,7 +219,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const deleteAppointment = async (id: string) => {
     try {
       const { error } = await supabase
-        .from("appointments")
+        .from("patient_appointments")
         .delete()
         .eq("id", id);
 
@@ -236,7 +237,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const deleteEvent = async (id: string) => {
     try {
       const { error } = await supabase
-        .from("events")
+        .from("patient_events")
         .delete()
         .eq("id", id);
 
@@ -254,7 +255,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const deleteExam = async (id: string) => {
     try {
       const { error } = await supabase
-        .from("exams")
+        .from("patient_exams")
         .delete()
         .eq("id", id);
 
@@ -272,7 +273,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const confirmAppointment = async (id: string) => {
     try {
       const { data, error } = await supabase
-        .from("appointments")
+        .from("patient_appointments")
         .update({ confirmed: true })
         .eq("id", id)
         .select("*");
@@ -283,7 +284,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (data && data.length > 0) {
         setAppointments(prevAppointments =>
-          prevAppointments.map(appointment => (appointment.id === id ? data[0] : appointment))
+          prevAppointments.map(appointment => (appointment.id === id ? data[0] as AppointmentType : appointment))
         );
         toast.success('Consulta confirmada com sucesso!');
       }
@@ -295,7 +296,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const confirmEvent = async (id: string) => {
     try {
       const { data, error } = await supabase
-        .from("events")
+        .from("patient_events")
         .update({ confirmed: true })
         .eq("id", id)
         .select("*");
@@ -306,7 +307,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (data && data.length > 0) {
         setEvents(prevEvents =>
-          prevEvents.map(event => (event.id === id ? data[0] : event))
+          prevEvents.map(event => (event.id === id ? data[0] as EventType : event))
         );
         toast.success('Evento confirmado com sucesso!');
       }
@@ -318,7 +319,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const confirmExam = async (id: string) => {
     try {
       const { data, error } = await supabase
-        .from("exams")
+        .from("patient_exams")
         .update({ confirmed: true })
         .eq("id", id)
         .select("*");
@@ -329,7 +330,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (data && data.length > 0) {
         setExams(prevExams =>
-          prevExams.map(exam => (exam.id === id ? data[0] : exam))
+          prevExams.map(exam => (exam.id === id ? data[0] as ExamType : exam))
         );
         toast.success('Exame confirmado com sucesso!');
       }
@@ -342,7 +343,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     try {
       // Fetch appointments
       const { data: appointmentsData, error: appointmentsError } = await supabase
-        .from("appointments")
+        .from("patient_appointments")
         .select("*")
         .eq("patient_id", patientId)
         .order("appointment_date");
@@ -351,11 +352,11 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         throw appointmentsError;
       }
 
-      setAppointments(appointmentsData || []);
+      setAppointments((appointmentsData || []) as AppointmentType[]);
 
       // Fetch events
       const { data: eventsData, error: eventsError } = await supabase
-        .from("events")
+        .from("patient_events")
         .select("*")
         .eq("patient_id", patientId)
         .order("event_date");
@@ -364,11 +365,11 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         throw eventsError;
       }
 
-      setEvents(eventsData || []);
+      setEvents((eventsData || []) as EventType[]);
 
       // Fetch exams
       const { data: examsData, error: examsError } = await supabase
-        .from("exams")
+        .from("patient_exams")
         .select("*")
         .eq("patient_id", patientId)
         .order("exam_date");
@@ -377,7 +378,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         throw examsError;
       }
 
-      setExams(examsData || []);
+      setExams((examsData || []) as ExamType[]);
 
     } catch (error: any) {
       toast.error(`Erro ao carregar dados: ${error.message}`);
