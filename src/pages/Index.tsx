@@ -17,6 +17,8 @@ const Index = () => {
   const { user } = useAuth();
   const [totalPatients, setTotalPatients] = useState(0);
   const [userName, setUserName] = useState("");
+  const [selectedPatientName, setSelectedPatientName] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -36,14 +38,25 @@ const Index = () => {
         // Get total patients count
         const { data: patientsData, error: patientsError } = await supabase
           .from("patients")
-          .select("id")
+          .select("id, full_name")
           .eq("caregiver_id", user.id);
 
         if (patientsError) throw patientsError;
         setTotalPatients(patientsData?.length || 0);
+
+        // Get selected patient name from localStorage
+        const selectedPatientId = localStorage.getItem("selectedPatientId");
+        if (selectedPatientId && patientsData) {
+          const selectedPatient = patientsData.find(p => p.id === selectedPatientId);
+          if (selectedPatient) {
+            setSelectedPatientName(selectedPatient.full_name);
+          }
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
         setUserName(user.email?.split("@")[0] || "Usuário");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -52,12 +65,41 @@ const Index = () => {
 
   const hasPatients = totalPatients > 0;
 
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-pulse">Carregando...</div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <WelcomeMessage userName={userName} hasPatients={hasPatients} />
-
-      {hasPatients && (
+      {!hasPatients ? (
+        <WelcomeMessage userName={userName} hasPatients={false} />
+      ) : (
         <>
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <h1 className="text-2xl font-bold">Bem-vindo(a), {userName}!</h1>
+            </div>
+            <p className="text-muted-foreground mb-4">
+              Aqui está um resumo dos seus pacientes e atividades de hoje.
+            </p>
+            {selectedPatientName && (
+              <div className="bg-primary/10 p-4 rounded-lg border border-primary/20 mb-6">
+                <h2 className="text-lg font-semibold text-primary">
+                  Paciente: {selectedPatientName}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  As informações abaixo referem-se ao paciente selecionado
+                </p>
+              </div>
+            )}
+          </div>
+
           <DashboardStats totalPatients={totalPatients} />
 
           <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
@@ -73,7 +115,6 @@ const Index = () => {
                   Acompanhe seus medicamentos diários
                 </p>
                 <Button
-                  variant="secondary"
                   className="mt-4 w-full"
                   onClick={() => navigate("/medicamentos")}
                 >
@@ -94,7 +135,6 @@ const Index = () => {
                   Gerencie suas consultas e compromissos
                 </p>
                 <Button
-                  variant="secondary"
                   className="mt-4 w-full"
                   onClick={() => navigate("/consultas")}
                 >
@@ -115,7 +155,6 @@ const Index = () => {
                   Acompanhe seu histórico e bem-estar
                 </p>
                 <Button
-                  variant="secondary"
                   className="mt-4 w-full"
                   onClick={() => navigate("/insights")}
                 >
@@ -136,7 +175,6 @@ const Index = () => {
                   Adicione e gerencie seus contatos
                 </p>
                 <Button
-                  variant="secondary"
                   className="mt-4 w-full"
                   onClick={() => navigate("/contatos")}
                 >

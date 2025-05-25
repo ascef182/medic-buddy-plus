@@ -46,16 +46,16 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ totalPatients }) => {
 
   // Chart data
   const activityData = [
-    { name: "Medicamentos", value: totalMedications, color: "#3b82f6" },
-    { name: "Consultas Hoje", value: todayAppointments, color: "#10b981" },
-    { name: "Eventos Hoje", value: todayEvents, color: "#f59e0b" },
-    { name: "Exames Hoje", value: todayExams, color: "#ef4444" }
+    { name: "Medicamentos", value: totalMedications, color: "#4A89DC" },
+    { name: "Consultas Hoje", value: todayAppointments, color: "#4A89DC" },
+    { name: "Eventos Hoje", value: todayEvents, color: "#4A89DC" },
+    { name: "Exames Hoje", value: todayExams, color: "#4A89DC" }
   ];
 
   const chartConfig = {
     value: {
       label: "Quantidade",
-      color: "hsl(var(--chart-1))",
+      color: "#4A89DC",
     },
   };
 
@@ -130,7 +130,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ totalPatients }) => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="value" fill="var(--color-value)" />
+                  <Bar dataKey="value" fill="#4A89DC" />
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
