@@ -25,4 +25,8 @@ export default defineConfig(({ mode }) => ({
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
   },
+  define: {
+    // Adiciona suporte global para vi
+    global: 'globalThis',
+  },
 }));

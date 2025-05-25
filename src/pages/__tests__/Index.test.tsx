@@ -1,6 +1,6 @@
 
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import Index from '../Index'
 
 // Mock dos contexts necessários
