@@ -1,3 +1,4 @@
+
 # 🏥 BuddyDoctor
 
 ![React](https://img.shields.io/badge/React-18.3-blue)
@@ -6,6 +7,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-DB-green)
 ![Vite](https://img.shields.io/badge/Vite-5.0-yellow)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Tests](https://img.shields.io/badge/Tests-Vitest-brightgreen)
 
 **BuddyDoctor** é uma plataforma completa de gerenciamento de cuidados médicos que permite cuidadores monitorarem e organizarem informações de saúde de seus pacientes de forma simples e eficiente.
 
@@ -22,6 +24,8 @@
 - **React Router** – Roteamento client-side
 - **Tanstack Query** – Gerenciamento de estado de servidor
 - **Lucide React** – Biblioteca de ícones
+- **Vitest** – Framework de testes unitários e integração
+- **Testing Library** – Utilitários para teste de componentes React
 
 ## ⚙️ Instalação e Execução Local
 
@@ -94,7 +98,90 @@ npm run type-check
 
 # Linting do código
 npm run lint
+
+# Executar testes
+npm run test
+
+# Executar testes em modo watch
+npm run test:watch
+
+# Executar testes com coverage
+npm run test:coverage
 ```
+
+## 🧪 Testes
+
+O projeto utiliza **Vitest** e **Testing Library** para garantir a qualidade e confiabilidade do código.
+
+### Executando Testes
+
+```bash
+# Executar todos os testes
+npm run test
+
+# Executar testes em modo watch (desenvolvimento)
+npm run test:watch
+
+# Executar testes com relatório de cobertura
+npm run test:coverage
+```
+
+### Estrutura de Testes
+
+```
+src/
+├── components/
+│   └── __tests__/          # Testes de componentes
+├── pages/
+│   └── __tests__/          # Testes de páginas
+├── utils/
+│   └── __tests__/          # Testes de utilitários
+└── test/
+    └── setup.ts            # Configuração global dos testes
+```
+
+### Cobertura de Testes
+
+O projeto mantém cobertura de testes para:
+- ✅ Componentes UI principais
+- ✅ Páginas da aplicação
+- ✅ Funções utilitárias
+- ✅ Hooks customizados
+- ✅ Contextos da aplicação
+
+## 🚀 CI/CD
+
+O projeto possui pipeline de CI/CD automatizado com **GitHub Actions**.
+
+### Pipeline de Deploy
+
+O pipeline é executado automaticamente a cada push na branch `main` e inclui:
+
+1. **🧪 Testes e Qualidade**
+   - Verificação de tipagem TypeScript
+   - Linting do código (ESLint)
+   - Execução de testes unitários
+   - Build do projeto
+
+2. **🚀 Deploy Automático**
+   - Deploy para Vercel (produção)
+   - Notificações de status
+
+### Configuração do CI/CD
+
+Para configurar o deploy automático:
+
+1. **Conecte seu repositório ao Vercel**
+2. **Configure os secrets no GitHub:**
+   - `VERCEL_TOKEN`
+   - `VERCEL_ORG_ID`
+   - `VERCEL_PROJECT_ID`
+
+3. **O deploy será automático** a cada push na branch main
+
+### Status do Build
+
+[![Deploy Status](https://img.shields.io/github/workflow/status/seu-usuario/buddydoctor/CI/CD%20Pipeline)](https://github.com/seu-usuario/buddydoctor/actions)
 
 ## 📁 Estrutura do Projeto
 
@@ -105,14 +192,20 @@ buddydoctor/
 │   ├── components/         # Componentes reutilizáveis
 │   │   ├── ui/            # Componentes base (shadcn/ui)
 │   │   ├── layout/        # Componentes de layout
-│   │   └── dashboard/     # Componentes específicos do dashboard
+│   │   ├── dashboard/     # Componentes específicos do dashboard
+│   │   └── __tests__/     # Testes dos componentes
 │   ├── pages/             # Páginas da aplicação
+│   │   └── __tests__/     # Testes das páginas
 │   ├── context/           # Context providers (Auth, Medication, etc.)
 │   ├── hooks/             # React custom hooks
 │   ├── lib/               # Utilitários e configurações
 │   ├── integrations/      # Integrações (Supabase)
-│   └── utils/             # Funções auxiliares
+│   ├── utils/             # Funções auxiliares
+│   └── test/              # Configuração de testes
+├── .github/
+│   └── workflows/         # GitHub Actions (CI/CD)
 ├── .env.local.example     # Exemplo de variáveis de ambiente
+├── vitest.config.ts       # Configuração do Vitest
 ├── README.md
 └── package.json
 ```
@@ -388,9 +481,26 @@ Ao fazer login pela primeira vez, você verá uma tela de boas-vindas.
 
 - Use TypeScript para tipagem
 - Siga os padrões do ESLint configurado
+- **Escreva testes** para novas funcionalidades
 - Mantenha componentes pequenos e focados
 - Escreva commits semânticos (feat, fix, docs, etc.)
-- Teste suas mudanças antes de enviar
+- **Teste suas mudanças** antes de enviar: `npm run test`
+- Verifique a cobertura de testes: `npm run test:coverage`
+
+### Executando Testes Localmente
+
+Antes de enviar um PR, certifique-se de que:
+
+```bash
+# Todos os testes passam
+npm run test
+
+# Não há erros de lint
+npm run lint
+
+# O projeto compila sem erros
+npm run build
+```
 
 ## 📄 Licença
 
