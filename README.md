@@ -1,7 +1,121 @@
-
 # 🏥 BuddyDoctor
 
+![React](https://img.shields.io/badge/React-18.3-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Tailwind](https://img.shields.io/badge/Tailwind-CSS-blueviolet)
+![Supabase](https://img.shields.io/badge/Supabase-DB-green)
+![Vite](https://img.shields.io/badge/Vite-5.0-yellow)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 **BuddyDoctor** é uma plataforma completa de gerenciamento de cuidados médicos que permite cuidadores monitorarem e organizarem informações de saúde de seus pacientes de forma simples e eficiente.
+
+## 🛠️ Tecnologias Utilizadas
+
+- **React.js** – Biblioteca principal de UI
+- **TypeScript** – Tipagem estática e desenvolvimento mais seguro
+- **Vite** – Build tool moderno e rápido
+- **Tailwind CSS** – Estilização moderna e responsiva
+- **Supabase** – Backend as a Service (autenticação, banco de dados, storage)
+- **React Hook Form + Zod** – Validação e controle de formulários
+- **Recharts** – Visualização de dados e gráficos
+- **Shadcn/ui** – Componentes acessíveis e prontos para produção
+- **React Router** – Roteamento client-side
+- **Tanstack Query** – Gerenciamento de estado de servidor
+- **Lucide React** – Biblioteca de ícones
+
+## ⚙️ Instalação e Execução Local
+
+### Pré-requisitos
+
+- Node.js (v18 ou superior)
+- npm, yarn ou bun
+- Git
+- Conta no Supabase (para backend)
+
+### 🔧 Clonando o Repositório
+
+```bash
+git clone https://github.com/seu-usuario/buddydoctor.git
+cd buddydoctor
+```
+
+### 📦 Instalando Dependências
+
+Com npm:
+```bash
+npm install
+```
+
+Com yarn:
+```bash
+yarn install
+```
+
+Com bun:
+```bash
+bun install
+```
+
+### 🗃️ Configuração de Variáveis de Ambiente
+
+Crie um arquivo `.env.local` na raiz do projeto:
+
+```ini
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-anonima-do-supabase
+```
+
+### ▶️ Executando o Projeto
+
+```bash
+npm run dev
+# ou
+yarn dev
+# ou
+bun dev
+```
+
+O projeto estará disponível em `http://localhost:5173`.
+
+## 📜 Scripts Disponíveis
+
+```bash
+# Iniciar projeto em modo desenvolvimento
+npm run dev
+
+# Build para produção
+npm run build
+
+# Preview do build de produção
+npm run preview
+
+# Verificação de tipos TypeScript
+npm run type-check
+
+# Linting do código
+npm run lint
+```
+
+## 📁 Estrutura do Projeto
+
+```
+buddydoctor/
+├── public/                 # Arquivos públicos (favicon, etc.)
+├── src/
+│   ├── components/         # Componentes reutilizáveis
+│   │   ├── ui/            # Componentes base (shadcn/ui)
+│   │   ├── layout/        # Componentes de layout
+│   │   └── dashboard/     # Componentes específicos do dashboard
+│   ├── pages/             # Páginas da aplicação
+│   ├── context/           # Context providers (Auth, Medication, etc.)
+│   ├── hooks/             # React custom hooks
+│   ├── lib/               # Utilitários e configurações
+│   ├── integrations/      # Integrações (Supabase)
+│   └── utils/             # Funções auxiliares
+├── .env.local.example     # Exemplo de variáveis de ambiente
+├── README.md
+└── package.json
+```
 
 ## 📋 Índice
 
@@ -14,7 +128,7 @@
   - [4. Gerenciando Consultas](#4-gerenciando-consultas)
   - [5. Registrando Humor](#5-registrando-humor)
   - [6. Configurando Contatos](#6-configurando-contatos)
-- [Funcionalidades Avançadas](#-funcionalidades-avançadas)
+- [Funcionalidades Avançadas](#-funcionalidades-avancadas)
 - [Dicas de Uso](#-dicas-de-uso)
 - [Suporte](#-suporte)
 
@@ -262,42 +376,35 @@ Ao fazer login pela primeira vez, você verá uma tela de boas-vindas.
 - 🔒 **Faça logout** em computadores compartilhados
 - 🔒 **Mantenha dados atualizados** para emergências
 
-## 🛠️ Solução de Problemas
+## 🤝 Como Contribuir
 
-### Problemas Comuns
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature: `git checkout -b minha-feature`
+3. Commit suas mudanças: `git commit -m 'feat: adiciona nova funcionalidade'`
+4. Push para a branch: `git push origin minha-feature`
+5. Abra um Pull Request
 
-**Não consigo fazer login**
-- Verifique se o email está correto
-- Tente redefinir a senha
-- Limpe o cache do navegador
+### Padrões de Desenvolvimento
 
-**Medicamento não aparece**
-- Verifique se há um paciente selecionado
-- Confirme se salvou corretamente
-- Atualize a página
+- Use TypeScript para tipagem
+- Siga os padrões do ESLint configurado
+- Mantenha componentes pequenos e focados
+- Escreva commits semânticos (feat, fix, docs, etc.)
+- Teste suas mudanças antes de enviar
 
-**Gráficos não carregam**
-- Aguarde alguns segundos
-- Verifique sua conexão com internet
-- Atualize a página
+## 📄 Licença
 
-**Dados não sincronizam**
-- Verifique sua conexão
-- Faça logout e login novamente
-- Entre em contato com o suporte
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](./LICENSE) para mais detalhes.
 
-## 📱 Compatibilidade
+## 👨‍💻 Desenvolvedor
 
-### Navegadores Suportados
-- ✅ Chrome (versão 90+)
-- ✅ Firefox (versão 88+)
-- ✅ Safari (versão 14+)
-- ✅ Edge (versão 90+)
+Desenvolvido com ❤️ por [Seu Nome]
 
-### Dispositivos
-- 💻 **Desktop**: Experiência completa
-- 📱 **Mobile**: Interface responsiva
-- 📊 **Tablet**: Ideal para visualização de gráficos
+- 💼 [LinkedIn](https://linkedin.com/in/seu-perfil)
+- 🐙 [GitHub](https://github.com/seu-usuario)
+- 📧 Email: seu-email@exemplo.com
+
+---
 
 ## 🆘 Suporte
 
@@ -313,10 +420,6 @@ Ao fazer login pela primeira vez, você verá uma tela de boas-vindas.
 - **Domingo**: Apenas emergências
 
 ---
-
-## 🤝 Contribuição
-
-BuddyDoctor é desenvolvido com foco na experiência do usuário e segurança dos dados médicos. Sugestões e feedback são sempre bem-vindos!
 
 **Versão**: 1.0.0  
 **Última Atualização**: Janeiro 2024
