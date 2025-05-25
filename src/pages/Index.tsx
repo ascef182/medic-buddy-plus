@@ -89,12 +89,7 @@ const Index = () => {
               Aqui está um resumo dos seus pacientes e atividades de hoje.
             </p>
             {selectedPatientName && (
-              
-            )}
-          </div>
-
-          <DashboardStats totalPatients={totalPatients} />
-<div className="bg-primary/10 p-4 rounded-lg border border-primary/20 mb-6">
+              <div className="bg-primary/10 p-4 rounded-lg border border-primary/20 mb-6">
                 <h2 className="text-lg font-semibold text-primary">
                   Paciente: {selectedPatientName}
                 </h2>
@@ -102,6 +97,11 @@ const Index = () => {
                   As informações abaixo referem-se ao paciente selecionado
                 </p>
               </div>
+            )}
+          </div>
+
+          <DashboardStats totalPatients={totalPatients} />
+
           <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
             <Card className="shadow">
               <CardHeader>
