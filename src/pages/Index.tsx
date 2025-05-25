@@ -88,19 +88,20 @@ const Index = () => {
             <p className="text-muted-foreground mb-4">
               Aqui está um resumo dos seus pacientes e atividades de hoje.
             </p>
-            {selectedPatientName && (
-              <div className="bg-primary/10 p-4 rounded-lg border border-primary/20 mb-6">
-                <h2 className="text-lg font-semibold text-primary">
-                  Paciente: {selectedPatientName}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  As informações abaixo referem-se ao paciente selecionado
-                </p>
-              </div>
-            )}
           </div>
 
           <DashboardStats totalPatients={totalPatients} />
+
+          {selectedPatientName && (
+            <div className="bg-primary/10 p-4 rounded-lg border border-primary/20 mb-6">
+              <h2 className="text-lg font-semibold text-primary">
+                Paciente: {selectedPatientName}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                As informações abaixo referem-se ao paciente selecionado
+              </p>
+            </div>
+          )}
 
           <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
             <Card className="shadow">
