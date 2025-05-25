@@ -124,6 +124,9 @@ npm run test:watch
 
 # Executar testes com relatório de cobertura
 npm run test:coverage
+
+# Executar testes específicos
+npm run test -- --run src/components/ui/__tests__/button.test.tsx
 ```
 
 ### Estrutura de Testes
@@ -131,23 +134,123 @@ npm run test:coverage
 ```
 src/
 ├── components/
-│   └── __tests__/          # Testes de componentes
+│   ├── dashboard/
+│   │   └── __tests__/          # Testes dos componentes do dashboard
+│   │       ├── DashboardStats.test.tsx
+│   │       └── WelcomeMessage.test.tsx
+│   └── ui/
+│       └── __tests__/          # Testes dos componentes de UI
+│           └── button.test.tsx
 ├── pages/
-│   └── __tests__/          # Testes de páginas
+│   └── __tests__/              # Testes das páginas
+│       └── Index.test.tsx
 ├── utils/
-│   └── __tests__/          # Testes de utilitários
+│   └── __tests__/              # Testes de utilitários
 └── test/
-    └── setup.ts            # Configuração global dos testes
+    └── setup.ts                # Configuração global dos testes
+```
+
+### Tipos de Testes
+
+#### 🔍 Testes Unitários
+- Testam componentes individuais isoladamente
+- Verificam propriedades, eventos e renderização
+- Localização: `src/components/**/__tests__/`
+
+#### 🌐 Testes de Integração
+- Testam a interação entre componentes
+- Verificam fluxos completos de usuário
+- Localização: `src/pages/**/__tests__/`
+
+#### ⚙️ Testes de Utilitários
+- Testam funções auxiliares e hooks
+- Verificam lógica de negócio
+- Localização: `src/utils/**/__tests__/`
+
+### Configuração de Testes
+
+#### Vitest Config (`vitest.config.ts`)
+```typescript
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    globals: true,
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
+```
+
+#### Setup Global (`src/test/setup.ts`)
+```typescript
+import '@testing-library/jest-dom'
+import { vi } from 'vitest'
+
+// Mocks globais para Supabase e React Router
+// Configurações automáticas para todos os testes
 ```
 
 ### Cobertura de Testes
 
 O projeto mantém cobertura de testes para:
-- ✅ Componentes UI principais
-- ✅ Páginas da aplicação
+- ✅ Componentes UI principais (Button, Dashboard, etc.)
+- ✅ Páginas da aplicação (Index, Auth, etc.)
 - ✅ Funções utilitárias
 - ✅ Hooks customizados
 - ✅ Contextos da aplicação
+
+### Executando Testes no CI/CD
+
+Os testes são executados automaticamente no pipeline de CI/CD:
+
+```yaml
+# .github/workflows/ci-cd.yml
+- name: 🧪 Executar testes
+  run: npm run test
+
+- name: 📊 Gerar relatório de cobertura
+  run: npm run test:coverage
+```
+
+### Escrevendo Novos Testes
+
+#### Exemplo de Teste de Componente
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { Button } from '../button'
+
+describe('Button', () => {
+  it('renders button with text', () => {
+    render(<Button>Clique aqui</Button>)
+    expect(screen.getByRole('button', { name: 'Clique aqui' })).toBeInTheDocument()
+  })
+
+  it('handles click events', () => {
+    const handleClick = vi.fn()
+    render(<Button onClick={handleClick}>Clique aqui</Button>)
+    
+    fireEvent.click(screen.getByRole('button'))
+    expect(handleClick).toHaveBeenCalledTimes(1)
+  })
+})
+```
+
+#### Padrões de Teste
+- Use `describe()` para agrupar testes relacionados
+- Use `it()` ou `test()` para casos de teste individuais
+- Use `vi.fn()` para criar mocks de funções
+- Use `screen.getByRole()` preferencialmente para consultas
+- Use `expect().toBeInTheDocument()` para verificar renderização
 
 ## 🚀 CI/CD
 
