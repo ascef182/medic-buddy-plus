@@ -33,7 +33,7 @@
     --input: 214 32% 91%;
     --ring: 213 70% 58%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -91,10 +91,33 @@
   }
 
   body {
-    @apply bg-background text-foreground font-['Roboto',sans-serif];
+    @apply bg-background text-foreground font-['Roboto',sans-serif] text-sm;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-medium;
+  }
+
+  h1 {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+
+  h2 {
+    @apply text-base sm:text-lg md:text-xl;
+  }
+
+  h3 {
+    @apply text-sm sm:text-base md:text-lg;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .card {
+      @apply text-xs;
+    }
+    
+    .btn-responsive {
+      @apply px-2 py-1 text-xs;
+    }
   }
 }

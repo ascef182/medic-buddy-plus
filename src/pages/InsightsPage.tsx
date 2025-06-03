@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Filter, CalendarIcon, ChartBar, ChartLine } from "lucide-react";
@@ -54,7 +55,6 @@ const InsightsPage = () => {
     } else if (value === "30d") {
       fromDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 30);
     } else if (value === "all") {
-      // Use the earliest date available in data or default to 90 days ago
       const earliestMood = moodEntries.length > 0 
         ? new Date(Math.min(...moodEntries.map(e => new Date(e.date).getTime())))
         : new Date(today.getFullYear(), today.getMonth(), today.getDate() - 90);
@@ -80,98 +80,100 @@ const InsightsPage = () => {
 
   return (
     <Layout>
-      <div className="flex items-center gap-4 mb-6">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => navigate("/")}
-          className="rounded-full"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-bold">Insights</h1>
-      </div>
-
-      <div className="flex flex-col gap-4 mb-6">
-        <div className="flex flex-wrap gap-2">
-          {/* Time period filter */}
-          <Select
-            value={timePeriod}
-            onValueChange={(value) => handleTimePeriodChange(value as TimePeriod)}
+      <div className="px-2 sm:px-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate("/")}
+            className="p-1"
           >
-            <SelectTrigger className="w-[140px]">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Período" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(TIME_PERIODS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Custom date range picker */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="justify-start h-10">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                <span className="text-xs sm:text-sm whitespace-nowrap">
-                  {dateRange.from && dateRange.to ? (
-                    <>
-                      {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} - {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
-                    </>
-                  ) : (
-                    "Selecione período"
-                  )}
-                </span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="range"
-                defaultMonth={dateRange.from}
-                selected={{ from: dateRange.from, to: dateRange.to }}
-                onSelect={(range) => {
-                  if (range?.from && range?.to) {
-                    setDateRange({ from: range.from, to: range.to });
-                    setTimePeriod("all"); // Custom range
-                  }
-                }}
-                numberOfMonths={1}
-                locale={ptBR}
-              />
-            </PopoverContent>
-          </Popover>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-lg font-bold">Insights</h1>
         </div>
+
+        <div className="flex flex-col gap-2 mb-4">
+          <div className="flex flex-wrap gap-2">
+            {/* Time period filter */}
+            <Select
+              value={timePeriod}
+              onValueChange={(value) => handleTimePeriodChange(value as TimePeriod)}
+            >
+              <SelectTrigger className="w-[120px] h-8">
+                <CalendarIcon className="mr-1 h-3 w-3" />
+                <SelectValue placeholder="Período" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(TIME_PERIODS).map(([value, label]) => (
+                  <SelectItem key={value} value={value} className="text-xs">{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Custom date range picker */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="h-8 text-xs">
+                  <CalendarIcon className="mr-1 h-3 w-3" />
+                  <span className="whitespace-nowrap">
+                    {dateRange.from && dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "dd/MM", { locale: ptBR })} - {format(dateRange.to, "dd/MM", { locale: ptBR })}
+                      </>
+                    ) : (
+                      "Período"
+                    )}
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="range"
+                  defaultMonth={dateRange.from}
+                  selected={{ from: dateRange.from, to: dateRange.to }}
+                  onSelect={(range) => {
+                    if (range?.from && range?.to) {
+                      setDateRange({ from: range.from, to: range.to });
+                      setTimePeriod("all");
+                    }
+                  }}
+                  numberOfMonths={1}
+                  locale={ptBR}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        <Tabs defaultValue="medicacoes" className="w-full">
+          <TabsList className="grid grid-cols-2 mb-3 w-full">
+            <TabsTrigger value="medicacoes" className="text-xs">
+              <ChartBar className="mr-1 h-3 w-3" />
+              <span className="hidden sm:inline">Medicações</span>
+              <span className="sm:hidden">Med.</span>
+            </TabsTrigger>
+            <TabsTrigger value="humor" className="text-xs">
+              <ChartLine className="mr-1 h-3 w-3" />
+              Humor
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="medicacoes" className="w-full overflow-hidden">
+            <MedicationUsageChart 
+              medications={filteredMedications}
+              dateRange={dateRange}
+            />
+          </TabsContent>
+
+          <TabsContent value="humor" className="w-full overflow-hidden">
+            <MoodTrendsChart 
+              moodEntries={filteredMoodEntries}
+              dateRange={dateRange}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Garantir que os tabs fiquem um abaixo do outro em dispositivos móveis */}
-      <Tabs defaultValue="medicacoes" className="w-full max-w-full">
-        <TabsList className="flex flex-col sm:grid sm:grid-cols-2 mb-4 w-full">
-          <TabsTrigger value="medicacoes" className="text-sm justify-start w-full">
-            <ChartBar className="mr-2 h-4 w-4" />
-            Medicações
-          </TabsTrigger>
-          <TabsTrigger value="humor" className="text-sm justify-start w-full">
-            <ChartLine className="mr-2 h-4 w-4" />
-            Humor
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="medicacoes" className="max-w-full overflow-x-hidden">
-          <MedicationUsageChart 
-            medications={filteredMedications}
-            dateRange={dateRange}
-          />
-        </TabsContent>
-
-        <TabsContent value="humor" className="max-w-full overflow-x-hidden">
-          <MoodTrendsChart 
-            moodEntries={filteredMoodEntries}
-            dateRange={dateRange}
-          />
-        </TabsContent>
-      </Tabs>
     </Layout>
   );
 };

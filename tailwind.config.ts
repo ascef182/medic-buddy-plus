@@ -92,9 +92,14 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out'
 			},
 			fontSize: {
-				'2xl': '1.75rem',
-				'3xl': '2rem',
-				'4xl': '2.25rem',
+				'xs': '0.65rem',
+				'sm': '0.75rem',
+				'base': '0.8rem',
+				'lg': '0.9rem',
+				'xl': '1rem',
+				'2xl': '1.125rem',
+				'3xl': '1.25rem',
+				'4xl': '1.5rem',
 			}
 		}
 	},

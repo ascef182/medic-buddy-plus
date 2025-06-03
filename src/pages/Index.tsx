@@ -69,7 +69,7 @@ const Index = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-pulse">Carregando...</div>
+          <div className="animate-pulse text-sm">Carregando...</div>
         </div>
       </Layout>
     );
@@ -80,111 +80,122 @@ const Index = () => {
       {!hasPatients ? (
         <WelcomeMessage userName={userName} hasPatients={false} />
       ) : (
-        <>
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <h1 className="text-2xl font-bold">Bem-vindo(a), {userName}!</h1>
+        <div className="px-2 sm:px-4">
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <h1 className="text-lg font-bold">Bem-vindo, {userName}!</h1>
             </div>
-            <p className="text-muted-foreground mb-4">
-              Aqui está um resumo dos seus pacientes e atividades de hoje.
+            <p className="text-muted-foreground text-xs mb-3">
+              Resumo dos seus pacientes e atividades de hoje.
             </p>
           </div>
 
           <DashboardStats totalPatients={totalPatients} />
 
           {selectedPatientName && (
-            <div className="bg-primary/10 p-4 rounded-lg border border-primary/20 mb-6">
-              <h2 className="text-lg font-semibold text-primary">
+            <div className="bg-primary/10 p-3 rounded-lg border border-primary/20 mb-4">
+              <h2 className="text-sm font-semibold text-primary">
                 Paciente: {selectedPatientName}
               </h2>
-              <p className="text-sm text-muted-foreground">
-                As informações abaixo referem-se ao paciente selecionado
+              <p className="text-xs text-muted-foreground">
+                Informações do paciente selecionado
               </p>
             </div>
           )}
 
-          <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 mb-6 grid-cols-2 lg:grid-cols-4">
             <Card className="shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ListChecks className="h-4 w-4 mr-2" />
-                  Medicamentos
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-xs">
+                  <ListChecks className="h-3 w-3" />
+                  <span className="hidden sm:inline">Medicamentos</span>
+                  <span className="sm:hidden">Med.</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Acompanhe seus medicamentos diários
+              <CardContent className="pt-0">
+                <p className="text-xs text-muted-foreground mb-2">
+                  <span className="hidden sm:inline">Acompanhe seus medicamentos</span>
+                  <span className="sm:hidden">Medicamentos</span>
                 </p>
                 <Button
-                  className="mt-4 w-full"
+                  className="w-full text-xs h-8"
                   onClick={() => navigate("/medicamentos")}
                 >
-                  Ver Medicamentos
+                  <span className="hidden sm:inline">Ver Medicamentos</span>
+                  <span className="sm:hidden">Ver</span>
                 </Button>
               </CardContent>
             </Card>
 
             <Card className="shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Consultas
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-xs">
+                  <Calendar className="h-3 w-3" />
+                  <span className="hidden sm:inline">Consultas</span>
+                  <span className="sm:hidden">Cons.</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Gerencie suas consultas e compromissos
+              <CardContent className="pt-0">
+                <p className="text-xs text-muted-foreground mb-2">
+                  <span className="hidden sm:inline">Gerencie consultas</span>
+                  <span className="sm:hidden">Consultas</span>
                 </p>
                 <Button
-                  className="mt-4 w-full"
+                  className="w-full text-xs h-8"
                   onClick={() => navigate("/consultas")}
                 >
-                  Ver Consultas
+                  <span className="hidden sm:inline">Ver Consultas</span>
+                  <span className="sm:hidden">Ver</span>
                 </Button>
               </CardContent>
             </Card>
 
             <Card className="shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChartBig className="h-4 w-4 mr-2" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-xs">
+                  <BarChartBig className="h-3 w-3" />
                   Insights
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Acompanhe seu histórico e bem-estar
+              <CardContent className="pt-0">
+                <p className="text-xs text-muted-foreground mb-2">
+                  <span className="hidden sm:inline">Histórico e bem-estar</span>
+                  <span className="sm:hidden">Histórico</span>
                 </p>
                 <Button
-                  className="mt-4 w-full"
+                  className="w-full text-xs h-8"
                   onClick={() => navigate("/insights")}
                 >
-                  Ver Insights
+                  <span className="hidden sm:inline">Ver Insights</span>
+                  <span className="sm:hidden">Ver</span>
                 </Button>
               </CardContent>
             </Card>
 
             <Card className="shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-4 w-4 mr-2" />
-                  Contatos
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-xs">
+                  <Users className="h-3 w-3" />
+                  <span className="hidden sm:inline">Contatos</span>
+                  <span className="sm:hidden">Cont.</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Adicione e gerencie seus contatos
+              <CardContent className="pt-0">
+                <p className="text-xs text-muted-foreground mb-2">
+                  <span className="hidden sm:inline">Gerencie contatos</span>
+                  <span className="sm:hidden">Contatos</span>
                 </p>
                 <Button
-                  className="mt-4 w-full"
+                  className="w-full text-xs h-8"
                   onClick={() => navigate("/contatos")}
                 >
-                  Ver Contatos
+                  <span className="hidden sm:inline">Ver Contatos</span>
+                  <span className="sm:hidden">Ver</span>
                 </Button>
               </CardContent>
             </Card>
           </div>
-        </>
+        </div>
       )}
     </Layout>
   );

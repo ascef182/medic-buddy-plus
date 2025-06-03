@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { PillBottle, Clock, Check, Bell, Plus, Calendar } from "lucide-react";
+import { PillBottle, Clock, Check, Bell, Plus, Calendar, Brush } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useMedication, MedicationType } from "@/context/MedicationContext";
@@ -30,35 +30,35 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
 
   return (
     <>
-      <Card className="overflow-hidden border-l-4 border-l-primary mb-4">
-        <CardContent className="p-4">
-          <div className="space-y-4">
+      <Card className="overflow-hidden border-l-4 border-l-primary mb-3">
+        <CardContent className="p-3">
+          <div className="space-y-3">
             {/* Header */}
             <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <PillBottle className="h-5 w-5 text-primary" />
-                  <h3 className="text-lg font-medium">{name}</h3>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <PillBottle className="h-4 w-4 text-primary flex-shrink-0" />
+                  <h3 className="text-sm font-medium truncate">{name}</h3>
                 </div>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-xs truncate">
                   {type} - {dosage}
                 </p>
-                <div className="flex items-center mt-1 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4 mr-1" />
-                  <span>{medication.frequency}</span>
+                <div className="flex items-center mt-1 text-xs text-muted-foreground">
+                  <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
+                  <span className="truncate">{medication.frequency}</span>
                 </div>
               </div>
               
-              <div className="text-right space-y-1">
-                <p className="text-sm font-medium">
-                  Estoque: {quantity} {unit}
+              <div className="text-right space-y-1 ml-2 flex-shrink-0">
+                <p className="text-xs font-medium">
+                  {quantity} {unit}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {daysOfStockLeft} dias restantes
+                  {daysOfStockLeft}d
                 </p>
                 {medication.expiry_date && (
                   <p className="text-xs text-muted-foreground">
-                    Vence: {new Date(medication.expiry_date).toLocaleDateString()}
+                    {new Date(medication.expiry_date).toLocaleDateString('pt-BR')}
                   </p>
                 )}
               </div>
@@ -72,19 +72,22 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
 
             {/* Times display */}
             {times.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                <span className="text-sm text-muted-foreground">Horários:</span>
-                {times.map((time, index) => (
-                  <span key={index} className="text-sm bg-muted px-2 py-1 rounded">
+              <div className="flex flex-wrap gap-1">
+                <span className="text-xs text-muted-foreground">Horários:</span>
+                {times.slice(0, 3).map((time, index) => (
+                  <span key={index} className="text-xs bg-muted px-2 py-1 rounded">
                     {time}
                   </span>
                 ))}
+                {times.length > 3 && (
+                  <span className="text-xs text-muted-foreground">+{times.length - 3}</span>
+                )}
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex flex-wrap gap-2 justify-between">
-              <div className="flex gap-2">
+            <div className="flex gap-1 justify-between items-center">
+              <div className="flex gap-1">
                 <MedicationAlertSettings 
                   medicationId={id} 
                   medicationName={name}
@@ -96,16 +99,24 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowRestockDialog(true)}
+                  className="px-2 h-8"
                 >
-                  <Plus className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Reabastecer</span>
+                  <Plus className="h-3 w-3" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="px-2 h-8"
+                >
+                  <Brush className="h-3 w-3" />
                 </Button>
               </div>
               
               <Button
                 variant={isTakenToday ? "outline" : "default"}
                 size="sm"
-                className={`${isTakenToday ? "bg-muted" : ""} ${
+                className={`text-xs px-2 h-8 ${isTakenToday ? "bg-muted" : ""} ${
                   status === 'overdue' ? "bg-red-500 hover:bg-red-600 text-white" : ""
                 }`}
                 onClick={() => takeMedication(id)}
@@ -113,15 +124,11 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
               >
                 {isTakenToday ? (
                   <span className="flex items-center">
-                    <Check className="h-4 w-4 mr-1" /> 
-                    <span className="hidden sm:inline">Tomado hoje</span>
-                    <span className="inline sm:hidden">Tomado</span>
+                    <Check className="h-3 w-3 mr-1" /> 
+                    <span className="hidden sm:inline">Tomado</span>
                   </span>
                 ) : (
-                  <>
-                    <span className="hidden sm:inline">Marcar como tomado</span>
-                    <span className="inline sm:hidden">Marcar</span>
-                  </>
+                  <span className="hidden sm:inline">Marcar</span>
                 )}
               </Button>
             </div>
@@ -129,8 +136,8 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
             {/* Additional info */}
             {medication.notes && (
               <div className="pt-2 border-t">
-                <p className="text-sm text-muted-foreground">
-                  <strong>Observações:</strong> {medication.notes}
+                <p className="text-xs text-muted-foreground">
+                  <strong>Obs:</strong> {medication.notes}
                 </p>
               </div>
             )}
