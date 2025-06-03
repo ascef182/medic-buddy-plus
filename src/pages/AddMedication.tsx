@@ -10,21 +10,22 @@ const AddMedication = () => {
 
   return (
     <Layout>
-      <div className="mb-6">
+      <div className="max-w-2xl mx-auto">
         <Button
           variant="ghost"
           onClick={() => navigate("/medicamentos")}
-          className="mb-4"
+          className="mb-6 -ml-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
-        <h1 className="text-2xl font-bold">Adicionar Novo Medicamento</h1>
-        <p className="text-muted-foreground">
-          Preencha as informações do medicamento abaixo
-        </p>
-      </div>
+        
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">Adicionar Novo Medicamento</h1>
+          <p className="text-muted-foreground">
+            Preencha as informações do medicamento abaixo
+          </p>
+        </div>
 
-      <div className="max-w-2xl mx-auto">
         <AddMedicationForm />
       </div>
     </Layout>
