@@ -103,7 +103,7 @@ const AddMedicationForm: React.FC = () => {
         <h3 className="text-lg font-medium">Informações Básicas</h3>
         
         <div>
-          <Label htmlFor="name">Nome do Medicamento</Label>
+          <Label htmlFor="name" className="text-left block">Nome do Medicamento</Label>
           <Input
             id="name"
             value={name}
@@ -116,7 +116,7 @@ const AddMedicationForm: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="type">Tipo</Label>
+            <Label htmlFor="type" className="text-left block">Tipo</Label>
             <Select value={type} onValueChange={setType} required>
               <SelectTrigger id="type" className="mt-1">
                 <SelectValue placeholder="Selecione o tipo" />
@@ -135,7 +135,7 @@ const AddMedicationForm: React.FC = () => {
           </div>
 
           <div>
-            <Label htmlFor="dosage">Concentração/Dosagem</Label>
+            <Label htmlFor="dosage" className="text-left block">Concentração/Dosagem</Label>
             <Input
               id="dosage"
               value={dosage}
@@ -154,7 +154,7 @@ const AddMedicationForm: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <Label htmlFor="quantity">Quantidade Atual</Label>
+            <Label htmlFor="quantity" className="text-left block">Quantidade Atual</Label>
             <Input
               id="quantity"
               value={quantity}
@@ -168,7 +168,7 @@ const AddMedicationForm: React.FC = () => {
           </div>
 
           <div>
-            <Label htmlFor="unit">Unidade</Label>
+            <Label htmlFor="unit" className="text-left block">Unidade</Label>
             <Select value={unit} onValueChange={setUnit} required>
               <SelectTrigger id="unit" className="mt-1">
                 <SelectValue />
@@ -186,7 +186,7 @@ const AddMedicationForm: React.FC = () => {
           </div>
 
           <div>
-            <Label htmlFor="dose-per-intake">Dose por Tomada</Label>
+            <Label htmlFor="dose-per-intake" className="text-left block">Dose por Tomada</Label>
             <Input
               id="dose-per-intake"
               value={dosePerIntake}
@@ -202,7 +202,7 @@ const AddMedicationForm: React.FC = () => {
         </div>
 
         <div>
-          <Label htmlFor="stock-alert">Alerta de Estoque Baixo (dias)</Label>
+          <Label htmlFor="stock-alert" className="text-left block">Alerta de Estoque Baixo (dias)</Label>
           <Input
             id="stock-alert"
             value={stockAlertThreshold}
@@ -223,7 +223,7 @@ const AddMedicationForm: React.FC = () => {
         <h3 className="text-lg font-medium">Horários e Frequência</h3>
         
         <div>
-          <Label htmlFor="frequency">Frequência</Label>
+          <Label htmlFor="frequency" className="text-left block">Frequência</Label>
           <Select value={frequency} onValueChange={setFrequency} required>
             <SelectTrigger id="frequency" className="mt-1">
               <SelectValue placeholder="Selecione a frequência" />
@@ -243,7 +243,7 @@ const AddMedicationForm: React.FC = () => {
         </div>
 
         <div>
-          <Label>Horários</Label>
+          <Label className="text-left block">Horários</Label>
           <div className="space-y-2 mt-1">
             {times.map((time, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -284,7 +284,7 @@ const AddMedicationForm: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label>Data de Início</Label>
+            <Label className="text-left block">Data de Início</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -310,7 +310,7 @@ const AddMedicationForm: React.FC = () => {
           </div>
 
           <div>
-            <Label>Data de Término (opcional)</Label>
+            <Label className="text-left block">Data de Término (opcional)</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -337,7 +337,7 @@ const AddMedicationForm: React.FC = () => {
         </div>
 
         <div>
-          <Label>Data de Validade (opcional)</Label>
+          <Label className="text-left block">Data de Validade (opcional)</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -376,7 +376,7 @@ const AddMedicationForm: React.FC = () => {
 
       {/* Additional Notes */}
       <div>
-        <Label htmlFor="notes">Observações</Label>
+        <Label htmlFor="notes" className="text-left block">Observações</Label>
         <Textarea
           id="notes"
           value={notes}

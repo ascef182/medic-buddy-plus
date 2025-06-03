@@ -213,7 +213,7 @@ const Auth: React.FC = () => {
             <form onSubmit={handleAuth} className="space-y-4">
               {mode === AuthMode.SIGNUP && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="name">
+                  <label className="text-sm font-medium text-left block" htmlFor="name">
                     Nome completo
                   </label>
                   <Input
@@ -228,7 +228,7 @@ const Auth: React.FC = () => {
               )}
               
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="email">
+                <label className="text-sm font-medium text-left block" htmlFor="email">
                   Email
                 </label>
                 <Input
@@ -242,7 +242,7 @@ const Auth: React.FC = () => {
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="password">
+                <label className="text-sm font-medium text-left block" htmlFor="password">
                   Senha
                 </label>
                 <Input
@@ -288,7 +288,7 @@ const Auth: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-left block">Email</FormLabel>
                       <FormControl>
                         <Input placeholder="Digite seu email" {...field} />
                       </FormControl>
