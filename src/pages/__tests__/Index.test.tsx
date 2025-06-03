@@ -1,5 +1,6 @@
 
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
+import { screen } from '@testing-library/dom'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import Index from '../Index'
 
