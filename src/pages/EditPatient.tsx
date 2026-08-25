@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { getErrorMessage } from "@/lib/utils";
 
 interface Patient {
   id: string;
@@ -46,8 +47,8 @@ const EditPatient: React.FC = () => {
           setAge(data.age || "");
           setBloodType(data.blood_type || "");
         }
-      } catch (error: any) {
-        toast.error(`Erro ao carregar dados do paciente: ${error.message}`);
+      } catch (error: unknown) {
+        toast.error(`Erro ao carregar dados do paciente: ${getErrorMessage(error)}`);
         navigate("/pacientes");
       } finally {
         setIsLoading(false);
@@ -78,8 +79,8 @@ const EditPatient: React.FC = () => {
 
       toast.success(`Paciente atualizado com sucesso!`);
       navigate("/pacientes");
-    } catch (error: any) {
-      toast.error(`Erro ao atualizar paciente: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao atualizar paciente: ${getErrorMessage(error)}`);
     } finally {
       setIsSaving(false);
     }

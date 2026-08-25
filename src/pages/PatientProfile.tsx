@@ -24,6 +24,7 @@ import Layout from "@/components/layout/Layout";
 import { useMedication, PatientProfileType } from "@/context/MedicationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
+import { getErrorMessage } from "@/lib/utils";
 
 interface AllergyType {
   id: string;
@@ -109,7 +110,7 @@ const PatientProfile: React.FC = () => {
       setDiagnoses(diagnosesData || []);
       setChronicDiseases(diseasesData || []);
       setObservations(observationsData?.observations || "");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao carregar informações médicas:", error);
     }
   };
@@ -140,8 +141,8 @@ const PatientProfile: React.FC = () => {
         });
 
       if (error) throw error;
-    } catch (error: any) {
-      toast.error(`Erro ao salvar observações: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao salvar observações: ${getErrorMessage(error)}`);
     }
   };
 
@@ -163,8 +164,8 @@ const PatientProfile: React.FC = () => {
       setAllergies(prev => [...prev, data]);
       setNewAllergy("");
       toast.success("Alergia adicionada com sucesso!");
-    } catch (error: any) {
-      toast.error(`Erro ao adicionar alergia: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao adicionar alergia: ${getErrorMessage(error)}`);
     }
   };
 
@@ -179,8 +180,8 @@ const PatientProfile: React.FC = () => {
 
       setAllergies(prev => prev.filter(allergy => allergy.id !== id));
       toast.success("Alergia removida com sucesso!");
-    } catch (error: any) {
-      toast.error(`Erro ao remover alergia: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao remover alergia: ${getErrorMessage(error)}`);
     }
   };
 
@@ -202,8 +203,8 @@ const PatientProfile: React.FC = () => {
       setDiagnoses(prev => [...prev, data]);
       setNewDiagnosis("");
       toast.success("Diagnóstico adicionado com sucesso!");
-    } catch (error: any) {
-      toast.error(`Erro ao adicionar diagnóstico: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao adicionar diagnóstico: ${getErrorMessage(error)}`);
     }
   };
 
@@ -218,8 +219,8 @@ const PatientProfile: React.FC = () => {
 
       setDiagnoses(prev => prev.filter(diagnosis => diagnosis.id !== id));
       toast.success("Diagnóstico removido com sucesso!");
-    } catch (error: any) {
-      toast.error(`Erro ao remover diagnóstico: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao remover diagnóstico: ${getErrorMessage(error)}`);
     }
   };
 
@@ -241,8 +242,8 @@ const PatientProfile: React.FC = () => {
       setChronicDiseases(prev => [...prev, data]);
       setNewDisease("");
       toast.success("Doença crônica adicionada com sucesso!");
-    } catch (error: any) {
-      toast.error(`Erro ao adicionar doença crônica: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao adicionar doença crônica: ${getErrorMessage(error)}`);
     }
   };
 
@@ -257,8 +258,8 @@ const PatientProfile: React.FC = () => {
 
       setChronicDiseases(prev => prev.filter(disease => disease.id !== id));
       toast.success("Doença crônica removida com sucesso!");
-    } catch (error: any) {
-      toast.error(`Erro ao remover doença crônica: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao remover doença crônica: ${getErrorMessage(error)}`);
     }
   };
 

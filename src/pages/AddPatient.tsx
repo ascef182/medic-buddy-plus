@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { getErrorMessage } from "@/lib/utils";
 
 const AddPatient: React.FC = () => {
   const [fullName, setFullName] = useState("");
@@ -42,8 +43,8 @@ const AddPatient: React.FC = () => {
 
       toast.success(`Paciente ${fullName} adicionado com sucesso!`);
       navigate("/pacientes");
-    } catch (error: any) {
-      toast.error(`Erro ao adicionar paciente: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao adicionar paciente: ${getErrorMessage(error)}`);
     } finally {
       setIsLoading(false);
     }

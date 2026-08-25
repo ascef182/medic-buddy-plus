@@ -56,7 +56,19 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
     secondary: { label: "Quantidade", color: "#8b5cf6" },
   };
 
-  const customTooltip = ({ active, payload }: any) => {
+  interface MedicationChartDatum {
+    name: string;
+    fullName: string;
+    value: number;
+  }
+
+  const customTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean;
+    payload?: Array<{ payload: MedicationChartDatum }>;
+  }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -69,7 +81,21 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
     return null;
   };
 
-  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  const renderCustomLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+  }: {
+    cx: number;
+    cy: number;
+    midAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    percent: number;
+  }) => {
     if (percent < 0.1) return null; // Não mostrar labels para fatias muito pequenas
     
     const RADIAN = Math.PI / 180;

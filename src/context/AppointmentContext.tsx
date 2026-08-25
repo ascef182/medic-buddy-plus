@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/context/AuthContext";
+import { getErrorMessage } from "@/lib/utils";
 
 export interface AppointmentType {
   id: string;
@@ -102,8 +103,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         setAppointments(prevAppointments => [...prevAppointments, data[0] as AppointmentType]);
         toast.success('Consulta adicionada com sucesso!');
       }
-    } catch (error: any) {
-      toast.error(`Erro ao adicionar consulta: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao adicionar consulta: ${getErrorMessage(error)}`);
     }
   };
 
@@ -122,8 +123,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         setEvents(prevEvents => [...prevEvents, data[0] as EventType]);
         toast.success('Evento adicionado com sucesso!');
       }
-    } catch (error: any) {
-      toast.error(`Erro ao adicionar evento: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao adicionar evento: ${getErrorMessage(error)}`);
     }
   };
 
@@ -142,8 +143,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         setExams(prevExams => [...prevExams, data[0] as ExamType]);
         toast.success('Exame adicionado com sucesso!');
       }
-    } catch (error: any) {
-      toast.error(`Erro ao adicionar exame: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao adicionar exame: ${getErrorMessage(error)}`);
     }
   };
 
@@ -165,8 +166,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         );
         toast.success('Consulta atualizada com sucesso!');
       }
-    } catch (error: any) {
-      toast.error(`Erro ao atualizar consulta: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao atualizar consulta: ${getErrorMessage(error)}`);
     }
   };
 
@@ -188,8 +189,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         );
         toast.success('Evento atualizado com sucesso!');
       }
-    } catch (error: any) {
-      toast.error(`Erro ao atualizar evento: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao atualizar evento: ${getErrorMessage(error)}`);
     }
   };
 
@@ -211,8 +212,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         );
         toast.success('Exame atualizado com sucesso!');
       }
-    } catch (error: any) {
-      toast.error(`Erro ao atualizar exame: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao atualizar exame: ${getErrorMessage(error)}`);
     }
   };
 
@@ -229,8 +230,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       setAppointments(prevAppointments => prevAppointments.filter(appointment => appointment.id !== id));
       toast.success('Consulta removida com sucesso!');
-    } catch (error: any) {
-      toast.error(`Erro ao remover consulta: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao remover consulta: ${getErrorMessage(error)}`);
     }
   };
 
@@ -247,8 +248,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       setEvents(prevEvents => prevEvents.filter(event => event.id !== id));
       toast.success('Evento removido com sucesso!');
-    } catch (error: any) {
-      toast.error(`Erro ao remover evento: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao remover evento: ${getErrorMessage(error)}`);
     }
   };
 
@@ -265,8 +266,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       setExams(prevExams => prevExams.filter(exam => exam.id !== id));
       toast.success('Exame removido com sucesso!');
-    } catch (error: any) {
-      toast.error(`Erro ao remover exame: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao remover exame: ${getErrorMessage(error)}`);
     }
   };
 
@@ -288,8 +289,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         );
         toast.success('Consulta confirmada com sucesso!');
       }
-    } catch (error: any) {
-      toast.error(`Erro ao confirmar consulta: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao confirmar consulta: ${getErrorMessage(error)}`);
     }
   };
 
@@ -311,8 +312,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         );
         toast.success('Evento confirmado com sucesso!');
       }
-    } catch (error: any) {
-      toast.error(`Erro ao confirmar evento: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao confirmar evento: ${getErrorMessage(error)}`);
     }
   };
 
@@ -334,8 +335,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         );
         toast.success('Exame confirmado com sucesso!');
       }
-    } catch (error: any) {
-      toast.error(`Erro ao confirmar exame: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao confirmar exame: ${getErrorMessage(error)}`);
     }
   };
 
@@ -380,8 +381,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       setExams((examsData || []) as ExamType[]);
 
-    } catch (error: any) {
-      toast.error(`Erro ao carregar dados: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao carregar dados: ${getErrorMessage(error)}`);
     }
   };
 

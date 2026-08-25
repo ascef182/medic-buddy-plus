@@ -164,7 +164,19 @@ const MoodTrendsChart = ({ moodEntries, dateRange }: MoodTrendsChartProps) => {
     );
   }
 
-  const customTooltip = ({ active, payload }: any) => {
+  interface MoodChartDatum {
+    formattedDate: string;
+    moodValue: number | null;
+    mood: MoodType | null;
+  }
+
+  const customTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean;
+    payload?: Array<{ payload: MoodChartDatum }>;
+  }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (

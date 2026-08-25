@@ -23,6 +23,7 @@ import { Bell } from "lucide-react";
 import { useMedication } from "@/context/MedicationContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { getErrorMessage } from "@/lib/utils";
 
 interface MedicationAlertSettingsProps {
   medicationId: string;
@@ -51,8 +52,8 @@ const MedicationAlertSettings: React.FC<MedicationAlertSettingsProps> = ({
       
       toast.success("Configurações de alerta salvas com sucesso!");
       setOpen(false);
-    } catch (error: any) {
-      toast.error(`Erro ao salvar configurações: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao salvar configurações: ${getErrorMessage(error)}`);
       console.error("Error saving alert settings:", error);
     }
   };

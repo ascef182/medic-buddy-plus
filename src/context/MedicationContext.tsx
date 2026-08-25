@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/utils";
 
 // Enhanced MedicationType with all required fields
 export type MedicationType = {
@@ -203,9 +204,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         }));
         setMedications(typedMedications);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to load medications:", error);
-      toast.error(`Erro ao carregar medicamentos: ${error.message}`);
+      toast.error(`Erro ao carregar medicamentos: ${getErrorMessage(error)}`);
     }
   };
 
@@ -218,9 +219,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
 
       if (error) throw error;
       if (data) setContacts(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to load contacts:", error);
-      toast.error(`Erro ao carregar contatos: ${error.message}`);
+      toast.error(`Erro ao carregar contatos: ${getErrorMessage(error)}`);
     }
   };
 
@@ -240,9 +241,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
           date: entry.date
         })));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to load mood entries:", error);
-      toast.error(`Erro ao carregar entradas de humor: ${error.message}`);
+      toast.error(`Erro ao carregar entradas de humor: ${getErrorMessage(error)}`);
     }
   };
 
@@ -262,9 +263,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
           updated_at: data.updated_at || undefined
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to load patient profile:", error);
-      toast.error(`Erro ao carregar perfil do paciente: ${error.message}`);
+      toast.error(`Erro ao carregar perfil do paciente: ${getErrorMessage(error)}`);
     }
   };
 
@@ -312,9 +313,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         setMedications(prev => [...prev, newMedication]);
         toast.success("Medicamento adicionado com sucesso!");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to add medication:", error);
-      toast.error(`Erro ao adicionar medicamento: ${error.message}`);
+      toast.error(`Erro ao adicionar medicamento: ${getErrorMessage(error)}`);
     }
   };
 
@@ -335,9 +336,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         prev.map(med => med.id === id ? { ...med, ...updates } : med)
       );
       toast.success("Medicamento atualizado com sucesso!");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to update medication:", error);
-      toast.error(`Erro ao atualizar medicamento: ${error.message}`);
+      toast.error(`Erro ao atualizar medicamento: ${getErrorMessage(error)}`);
     }
   };
 
@@ -371,9 +372,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         )
       );
       toast.success("Medicamento marcado como tomado!");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to mark medication as taken:", error);
-      toast.error(`Erro ao marcar medicamento: ${error.message}`);
+      toast.error(`Erro ao marcar medicamento: ${getErrorMessage(error)}`);
     }
   };
 
@@ -383,8 +384,10 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
       if (!medication) return;
 
       const newTotalQuantity = medication.quantity + quantity;
-      const updateData: any = { quantity: newTotalQuantity };
-      
+      const updateData: { quantity: number; expiry_date?: string } = {
+        quantity: newTotalQuantity,
+      };
+
       if (newExpiryDate) {
         updateData.expiry_date = newExpiryDate.toISOString().split('T')[0];
       }
@@ -419,9 +422,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         )
       );
       toast.success("Medicamento reabastecido com sucesso!");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to restock medication:", error);
-      toast.error(`Erro ao reabastecer medicamento: ${error.message}`);
+      toast.error(`Erro ao reabastecer medicamento: ${getErrorMessage(error)}`);
     }
   };
 
@@ -446,9 +449,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         setContacts(prev => [...prev, data]);
         toast.success("Contato adicionado com sucesso!");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to add contact:", error);
-      toast.error(`Erro ao adicionar contato: ${error.message}`);
+      toast.error(`Erro ao adicionar contato: ${getErrorMessage(error)}`);
     }
   };
 
@@ -463,9 +466,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
 
       setContacts(prev => prev.filter(contact => contact.id !== id));
       toast.success("Contato removido com sucesso!");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to delete contact:", error);
-      toast.error(`Erro ao remover contato: ${error.message}`);
+      toast.error(`Erro ao remover contato: ${getErrorMessage(error)}`);
     }
   };
 
@@ -496,9 +499,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         setMoodEntries(prev => [newEntry, ...prev]);
         toast.success("Entrada de humor registrada!");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to add mood entry:", error);
-      toast.error(`Erro ao registrar humor: ${error.message}`);
+      toast.error(`Erro ao registrar humor: ${getErrorMessage(error)}`);
     }
   };
 
@@ -531,9 +534,9 @@ export const MedicationProvider: React.FC<MedicationProviderProps> = ({ children
         });
         toast.success("Perfil atualizado com sucesso!");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to update patient profile:", error);
-      toast.error(`Erro ao atualizar perfil: ${error.message}`);
+      toast.error(`Erro ao atualizar perfil: ${getErrorMessage(error)}`);
     }
   };
 

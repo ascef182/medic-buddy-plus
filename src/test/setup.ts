@@ -23,11 +23,14 @@ vi.mock('@/integrations/supabase/client', () => ({
   },
 }))
 
-// Mock do React Router
-vi.mock('react-router-dom', () => ({
-  useNavigate: () => vi.fn(),
-  useLocation: () => ({ pathname: '/' }),
-  BrowserRouter: ({ children }: { children: React.ReactNode }) => children,
-  Routes: ({ children }: { children: React.ReactNode }) => children,
-  Route: ({ children }: { children: React.ReactNode }) => children,
-}))
+// Mock do React Router — mantém a implementação real (Link, MemoryRouter,
+// BrowserRouter, Navigate, useParams etc.) e só sobrescreve os hooks que
+// precisam ser determinísticos em teste (useNavigate/useLocation).
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>()
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+    useLocation: () => ({ pathname: '/' }),
+  }
+})

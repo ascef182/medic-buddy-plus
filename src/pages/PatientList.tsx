@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { getErrorMessage } from "@/lib/utils";
 
 interface Patient {
   id: string;
@@ -38,8 +39,8 @@ const PatientList: React.FC = () => {
         if (data) {
           setPatients(data);
         }
-      } catch (error: any) {
-        toast.error(`Erro ao carregar pacientes: ${error.message}`);
+      } catch (error: unknown) {
+        toast.error(`Erro ao carregar pacientes: ${getErrorMessage(error)}`);
       } finally {
         setLoading(false);
       }
@@ -61,8 +62,8 @@ const PatientList: React.FC = () => {
 
       setPatients(patients.filter(p => p.id !== id));
       toast.success(`${name} foi removido(a) com sucesso`);
-    } catch (error: any) {
-      toast.error(`Erro ao excluir paciente: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao excluir paciente: ${getErrorMessage(error)}`);
     }
   };
 

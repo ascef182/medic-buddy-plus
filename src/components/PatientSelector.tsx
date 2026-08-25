@@ -14,6 +14,7 @@ import { ChevronDown, PlusCircle, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useMedication } from "@/context/MedicationContext";
+import { getErrorMessage } from "@/lib/utils";
 
 interface Patient {
   id: string;
@@ -78,9 +79,9 @@ const PatientSelector: React.FC<PatientSelectorProps> = ({
             loadPatientData(data[0].id);
           }
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Failed to load patients:", error);
-        toast.error(`Erro ao carregar pacientes: ${error.message}`);
+        toast.error(`Erro ao carregar pacientes: ${getErrorMessage(error)}`);
       } finally {
         setLoading(false);
       }

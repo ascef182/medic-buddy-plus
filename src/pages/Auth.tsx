@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getErrorMessage } from "@/lib/utils";
 
 const resetPasswordSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -71,7 +72,12 @@ const Auth: React.FC = () => {
         if (error) throw error;
         
         // Check if 2FA is enabled for this user
-        const { data: twoFactorEnabled } = await (supabase.rpc as any)('is_two_factor_enabled');
+        // TODO(supabase-recreate): is_two_factor_enabled isn't in the generated
+        // Database types yet (the Supabase project is being recreated). Once
+        // types.ts is regenerated against the new project this cast can go away.
+        const { data: twoFactorEnabled } = await (
+          supabase.rpc as unknown as (fn: string) => Promise<{ data: boolean }>
+        )('is_two_factor_enabled');
         
         if (twoFactorEnabled) {
           // Send OTP email
@@ -119,8 +125,8 @@ const Auth: React.FC = () => {
         toast.success("Instruções de redefinição de senha enviadas para seu email.");
         setMode(AuthMode.LOGIN);
       }
-    } catch (error: any) {
-      toast.error(`Erro: ${error.message || "Ocorreu um erro"}`);
+    } catch (error: unknown) {
+      toast.error(`Erro: ${getErrorMessage(error) || "Ocorreu um erro"}`);
     } finally {
       setIsLoading(false);
     }
@@ -137,8 +143,8 @@ const Auth: React.FC = () => {
       
       toast.success("Instruções de redefinição de senha enviadas para seu email.");
       setMode(AuthMode.LOGIN);
-    } catch (error: any) {
-      toast.error(`Erro: ${error.message || "Ocorreu um erro"}`);
+    } catch (error: unknown) {
+      toast.error(`Erro: ${getErrorMessage(error) || "Ocorreu um erro"}`);
     } finally {
       setIsLoading(false);
     }
@@ -158,8 +164,8 @@ const Auth: React.FC = () => {
       toast.success("Autenticação de dois fatores concluída com sucesso!");
       setShowOtpDialog(false);
       navigate("/");
-    } catch (error: any) {
-      toast.error(`Erro: ${error.message || "Código OTP inválido"}`);
+    } catch (error: unknown) {
+      toast.error(`Erro: ${getErrorMessage(error) || "Código OTP inválido"}`);
     } finally {
       setIsLoading(false);
     }
@@ -184,8 +190,8 @@ const Auth: React.FC = () => {
             
             toast.success("Senha atualizada com sucesso. Faça login com sua nova senha.");
             navigate("/auth");
-          } catch (error: any) {
-            toast.error(`Erro: ${error.message || "Ocorreu um erro"}`);
+          } catch (error: unknown) {
+            toast.error(`Erro: ${getErrorMessage(error) || "Ocorreu um erro"}`);
           }
         }
       }

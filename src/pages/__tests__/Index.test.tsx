@@ -2,6 +2,7 @@
 import { render } from '@testing-library/react'
 import { screen } from '@testing-library/dom'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
 import Index from '../Index'
 
 // Mock dos contexts necessários
@@ -28,18 +29,27 @@ describe('Index Page', () => {
   })
 
   it('renders loading state initially', () => {
-    render(<Index />)
-    
+    render(
+      <MemoryRouter>
+        <Index />
+      </MemoryRouter>,
+    )
+
     expect(screen.getByText('Carregando...')).toBeInTheDocument()
   })
 
   it('shows welcome message when loaded', async () => {
-    render(<Index />)
-    
-    // Wait for loading to finish and check for main navigation cards
-    await screen.findByText('Medicamentos')
-    expect(screen.getByText('Consultas')).toBeInTheDocument()
-    expect(screen.getByText('Insights')).toBeInTheDocument()
-    expect(screen.getByText('Contatos')).toBeInTheDocument()
+    render(
+      <MemoryRouter>
+        <Index />
+      </MemoryRouter>,
+    )
+
+    // The mocked Supabase client (src/test/setup.ts) never resolves any
+    // patients, so the component correctly takes the "no patients yet"
+    // branch and renders WelcomeMessage — this asserts on that, not on the
+    // nav-card grid (which only renders once totalPatients > 0).
+    await screen.findByText(/Bem-vindo\(a\) ao BuddyDoctor/)
+    expect(screen.getByText('Adicionar Primeiro Paciente')).toBeInTheDocument()
   })
 })

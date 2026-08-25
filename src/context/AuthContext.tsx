@@ -4,13 +4,14 @@ import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import { useNavigate } from "react-router-dom";
+import { getErrorMessage } from "@/lib/utils";
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  updateUser: (data: { email?: string; password?: string; data?: Record<string, any> }) => Promise<void>;
+  updateUser: (data: { email?: string; password?: string; data?: Record<string, unknown> }) => Promise<void>;
   requestPasswordReset: (email: string) => Promise<void>;
   enableTwoFactor: () => Promise<void>;
   disableTwoFactor: () => Promise<void>;
@@ -67,20 +68,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await supabase.auth.signOut();
       localStorage.removeItem("selectedPatientId");
       // Não precisamos redirecionar aqui, pois o evento SIGNED_OUT será capturado pelo listener
-    } catch (error: any) {
-      toast.error(`Erro ao fazer logout: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao fazer logout: ${getErrorMessage(error)}`);
     }
   };
 
-  const updateUser = async (data: { email?: string; password?: string; data?: Record<string, any> }) => {
+  const updateUser = async (data: { email?: string; password?: string; data?: Record<string, unknown> }) => {
     try {
       const { error } = await supabase.auth.updateUser(data);
       
       if (error) throw error;
       
       toast.success('Informações atualizadas com sucesso!');
-    } catch (error: any) {
-      toast.error(`Erro ao atualizar informações: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao atualizar informações: ${getErrorMessage(error)}`);
       throw error;
     }
   };
@@ -94,8 +95,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (error) throw error;
       
       toast.success('Instruções de redefinição de senha enviadas para seu email.');
-    } catch (error: any) {
-      toast.error(`Erro ao solicitar redefinição de senha: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao solicitar redefinição de senha: ${getErrorMessage(error)}`);
       throw error;
     }
   };
@@ -107,16 +108,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     
     try {
-      // Use type assertion to tell TypeScript that the rpc function exists
-      const { error } = await (supabase.rpc as any)('set_two_factor_enabled', { 
+      // TODO(supabase-recreate): set_two_factor_enabled isn't in the generated
+      // Database types yet (the Supabase project is being recreated). Once
+      // types.ts is regenerated against the new project this cast can go away.
+      const { error } = await (
+        supabase.rpc as unknown as (
+          fn: string,
+          args: Record<string, unknown>,
+        ) => Promise<{ error: unknown }>
+      )('set_two_factor_enabled', { 
         enabled: true 
       });
       
       if (error) throw error;
       
       toast.success('Autenticação de dois fatores ativada com sucesso!');
-    } catch (error: any) {
-      toast.error(`Erro ao ativar autenticação de dois fatores: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao ativar autenticação de dois fatores: ${getErrorMessage(error)}`);
       throw error;
     }
   };
@@ -128,16 +136,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     
     try {
-      // Use type assertion to tell TypeScript that the rpc function exists
-      const { error } = await (supabase.rpc as any)('set_two_factor_enabled', { 
+      // TODO(supabase-recreate): set_two_factor_enabled isn't in the generated
+      // Database types yet (the Supabase project is being recreated). Once
+      // types.ts is regenerated against the new project this cast can go away.
+      const { error } = await (
+        supabase.rpc as unknown as (
+          fn: string,
+          args: Record<string, unknown>,
+        ) => Promise<{ error: unknown }>
+      )('set_two_factor_enabled', { 
         enabled: false 
       });
       
       if (error) throw error;
       
       toast.success('Autenticação de dois fatores desativada com sucesso!');
-    } catch (error: any) {
-      toast.error(`Erro ao desativar autenticação de dois fatores: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Erro ao desativar autenticação de dois fatores: ${getErrorMessage(error)}`);
       throw error;
     }
   };
