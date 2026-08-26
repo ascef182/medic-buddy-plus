@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,22 +62,7 @@ const PatientProfile: React.FC = () => {
   const [newDiagnosis, setNewDiagnosis] = useState("");
   const [newDisease, setNewDisease] = useState("");
 
-  useEffect(() => {
-    if (patientProfile) {
-      setFormData({
-        full_name: patientProfile.full_name || "",
-        age: patientProfile.age || "",
-        blood_type: patientProfile.blood_type || "",
-        email: patientProfile.email || "",
-      });
-    }
-    
-    if (selectedPatientId) {
-      loadMedicalInformation();
-    }
-  }, [patientProfile, selectedPatientId]);
-
-  const loadMedicalInformation = async () => {
+  const loadMedicalInformation = useCallback(async () => {
     if (!selectedPatientId) return;
 
     try {
@@ -86,19 +71,19 @@ const PatientProfile: React.FC = () => {
         .from("patient_allergies")
         .select("*")
         .eq("patient_id", selectedPatientId);
-      
+
       // Load diagnoses
       const { data: diagnosesData } = await supabase
         .from("patient_diagnoses")
         .select("*")
         .eq("patient_id", selectedPatientId);
-      
+
       // Load chronic diseases
       const { data: diseasesData } = await supabase
         .from("patient_chronic_diseases")
         .select("*")
         .eq("patient_id", selectedPatientId);
-      
+
       // Load observations
       const { data: observationsData } = await supabase
         .from("patient_observations")
@@ -113,7 +98,22 @@ const PatientProfile: React.FC = () => {
     } catch (error: unknown) {
       console.error("Erro ao carregar informações médicas:", error);
     }
-  };
+  }, [selectedPatientId]);
+
+  useEffect(() => {
+    if (patientProfile) {
+      setFormData({
+        full_name: patientProfile.full_name || "",
+        age: patientProfile.age || "",
+        blood_type: patientProfile.blood_type || "",
+        email: patientProfile.email || "",
+      });
+    }
+
+    if (selectedPatientId) {
+      loadMedicalInformation();
+    }
+  }, [patientProfile, selectedPatientId, loadMedicalInformation]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useCallback, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -74,6 +74,52 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [exams, setExams] = useState<ExamType[]>([]);
   const { user } = useAuth();
 
+  const loadAppointmentData = useCallback(async (patientId: string) => {
+    try {
+      // Fetch appointments
+      const { data: appointmentsData, error: appointmentsError } = await supabase
+        .from("patient_appointments")
+        .select("*")
+        .eq("patient_id", patientId)
+        .order("appointment_date");
+
+      if (appointmentsError) {
+        throw appointmentsError;
+      }
+
+      setAppointments((appointmentsData || []) as AppointmentType[]);
+
+      // Fetch events
+      const { data: eventsData, error: eventsError } = await supabase
+        .from("patient_events")
+        .select("*")
+        .eq("patient_id", patientId)
+        .order("event_date");
+
+      if (eventsError) {
+        throw eventsError;
+      }
+
+      setEvents((eventsData || []) as EventType[]);
+
+      // Fetch exams
+      const { data: examsData, error: examsError } = await supabase
+        .from("patient_exams")
+        .select("*")
+        .eq("patient_id", patientId)
+        .order("exam_date");
+
+      if (examsError) {
+        throw examsError;
+      }
+
+      setExams((examsData || []) as ExamType[]);
+
+    } catch (error: unknown) {
+      toast.error(`Erro ao carregar dados: ${getErrorMessage(error)}`);
+    }
+  }, []);
+
   useEffect(() => {
     if (!user) return;
 
@@ -86,7 +132,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     };
 
     fetchAllData();
-  }, [user]);
+  }, [user, loadAppointmentData]);
 
   const addAppointment = async (appointment: CreateAppointmentType) => {
     try {
@@ -337,52 +383,6 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       }
     } catch (error: unknown) {
       toast.error(`Erro ao confirmar exame: ${getErrorMessage(error)}`);
-    }
-  };
-
-  const loadAppointmentData = async (patientId: string) => {
-    try {
-      // Fetch appointments
-      const { data: appointmentsData, error: appointmentsError } = await supabase
-        .from("patient_appointments")
-        .select("*")
-        .eq("patient_id", patientId)
-        .order("appointment_date");
-
-      if (appointmentsError) {
-        throw appointmentsError;
-      }
-
-      setAppointments((appointmentsData || []) as AppointmentType[]);
-
-      // Fetch events
-      const { data: eventsData, error: eventsError } = await supabase
-        .from("patient_events")
-        .select("*")
-        .eq("patient_id", patientId)
-        .order("event_date");
-
-      if (eventsError) {
-        throw eventsError;
-      }
-
-      setEvents((eventsData || []) as EventType[]);
-
-      // Fetch exams
-      const { data: examsData, error: examsError } = await supabase
-        .from("patient_exams")
-        .select("*")
-        .eq("patient_id", patientId)
-        .order("exam_date");
-
-      if (examsError) {
-        throw examsError;
-      }
-
-      setExams((examsData || []) as ExamType[]);
-
-    } catch (error: unknown) {
-      toast.error(`Erro ao carregar dados: ${getErrorMessage(error)}`);
     }
   };
 
