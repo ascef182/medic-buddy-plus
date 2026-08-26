@@ -90,9 +90,9 @@
     "vite": "^5.4.1"
   },
   "allowScripts": {
-    "@swc/core@1.7.39": true,
     "esbuild@0.21.5": true,
-    "esbuild@0.25.0": true,
-    "fsevents@2.3.3": true
+    "fsevents@2.3.3": true,
+    "@swc/core@1.16.1": true,
+    "esbuild@0.25.12": true
   }
 }
