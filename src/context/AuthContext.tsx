@@ -108,20 +108,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     
     try {
-      // TODO(supabase-recreate): set_two_factor_enabled isn't in the generated
-      // Database types yet (the Supabase project is being recreated). Once
-      // types.ts is regenerated against the new project this cast can go away.
-      const { error } = await (
-        supabase.rpc as unknown as (
-          fn: string,
-          args: Record<string, unknown>,
-        ) => Promise<{ error: unknown }>
-      )('set_two_factor_enabled', { 
-        enabled: true 
+      const { error } = await supabase.rpc('set_two_factor_enabled', {
+        enabled: true,
       });
-      
+
       if (error) throw error;
-      
+
       toast.success('Autenticação de dois fatores ativada com sucesso!');
     } catch (error: unknown) {
       toast.error(`Erro ao ativar autenticação de dois fatores: ${getErrorMessage(error)}`);
@@ -136,20 +128,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     
     try {
-      // TODO(supabase-recreate): set_two_factor_enabled isn't in the generated
-      // Database types yet (the Supabase project is being recreated). Once
-      // types.ts is regenerated against the new project this cast can go away.
-      const { error } = await (
-        supabase.rpc as unknown as (
-          fn: string,
-          args: Record<string, unknown>,
-        ) => Promise<{ error: unknown }>
-      )('set_two_factor_enabled', { 
-        enabled: false 
+      const { error } = await supabase.rpc('set_two_factor_enabled', {
+        enabled: false,
       });
-      
+
       if (error) throw error;
-      
+
       toast.success('Autenticação de dois fatores desativada com sucesso!');
     } catch (error: unknown) {
       toast.error(`Erro ao desativar autenticação de dois fatores: ${getErrorMessage(error)}`);

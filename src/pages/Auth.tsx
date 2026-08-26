@@ -72,12 +72,9 @@ const Auth: React.FC = () => {
         if (error) throw error;
         
         // Check if 2FA is enabled for this user
-        // TODO(supabase-recreate): is_two_factor_enabled isn't in the generated
-        // Database types yet (the Supabase project is being recreated). Once
-        // types.ts is regenerated against the new project this cast can go away.
-        const { data: twoFactorEnabled } = await (
-          supabase.rpc as unknown as (fn: string) => Promise<{ data: boolean }>
-        )('is_two_factor_enabled');
+        const { data: twoFactorEnabled } = await supabase.rpc(
+          'is_two_factor_enabled',
+        );
         
         if (twoFactorEnabled) {
           // Send OTP email
