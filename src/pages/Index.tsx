@@ -104,7 +104,7 @@ const Index = () => {
           )}
 
           <div className="grid gap-3 mb-6 grid-cols-2 lg:grid-cols-4">
-            <Card className="shadow">
+            <Card className="shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-xs">
                   <ListChecks className="h-3 w-3" />
@@ -127,7 +127,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow">
+            <Card className="shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-xs">
                   <Calendar className="h-3 w-3" />
@@ -150,7 +150,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow">
+            <Card className="shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-xs">
                   <BarChartBig className="h-3 w-3" />
@@ -172,7 +172,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow">
+            <Card className="shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-xs">
                   <Users className="h-3 w-3" />

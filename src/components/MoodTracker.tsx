@@ -46,7 +46,7 @@ const MoodTracker: React.FC = () => {
             <Button
               key={mood.value}
               type="button"
-              variant={selectedMood === mood.value ? "default" : "outline"}
+              variant={selectedMood === mood.value ? "default" : "outline-solid"}
               className={`h-16 flex flex-col items-center justify-center p-1 ${
                 selectedMood === mood.value ? 
                   mood.value === "happy" ? "bg-green-500" :

@@ -166,7 +166,7 @@ const MedicationUsageChart = ({ medications, dateRange }: MedicationUsageChartPr
             .map((medication) => (
               <div key={medication.id} className="flex justify-between items-center p-2 rounded-md bg-muted/50">
                 <div className="font-medium text-xs truncate flex-1 mr-2">{medication.name}</div>
-                <div className="text-xs text-muted-foreground flex-shrink-0">
+                <div className="text-xs text-muted-foreground shrink-0">
                   {medication.quantity} {medication.unit}
                 </div>
               </div>

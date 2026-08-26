@@ -37,19 +37,19 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <PillBottle className="h-4 w-4 text-primary flex-shrink-0" />
+                  <PillBottle className="h-4 w-4 text-primary shrink-0" />
                   <h3 className="text-sm font-medium truncate">{name}</h3>
                 </div>
                 <p className="text-muted-foreground text-xs truncate">
                   {type} - {dosage}
                 </p>
                 <div className="flex items-center mt-1 text-xs text-muted-foreground">
-                  <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
+                  <Calendar className="h-3 w-3 mr-1 shrink-0" />
                   <span className="truncate">{medication.frequency}</span>
                 </div>
               </div>
               
-              <div className="text-right space-y-1 ml-2 flex-shrink-0">
+              <div className="text-right space-y-1 ml-2 shrink-0">
                 <p className="text-xs font-medium">
                   {quantity} {unit}
                 </p>
@@ -114,7 +114,7 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication }) => {
               </div>
               
               <Button
-                variant={isTakenToday ? "outline" : "default"}
+                variant={isTakenToday ? "outline-solid" : "default"}
                 size="sm"
                 className={`text-xs px-2 h-8 ${isTakenToday ? "bg-muted" : ""} ${
                   status === 'overdue' ? "bg-red-500 hover:bg-red-600 text-white" : ""

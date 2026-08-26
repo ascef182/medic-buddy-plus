@@ -150,7 +150,7 @@ const Reminders = () => {
                           )}
                         </span>
                         <Button
-                          variant={isTakenToday ? "outline" : status === 'overdue' ? "destructive" : "default"}
+                          variant={isTakenToday ? "outline-solid" : status === 'overdue' ? "destructive" : "default"}
                           size="sm"
                           onClick={() => takeMedication(medication.id)}
                           disabled={isTakenToday || medication.quantity <= 0}

@@ -99,7 +99,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60 border-b">
         <div className="container flex items-center justify-between h-16 px-4 max-w-full">
           <div className="flex items-center gap-4">
             <Sheet open={open} onOpenChange={setOpen}>
