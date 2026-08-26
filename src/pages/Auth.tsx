@@ -17,6 +17,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getErrorMessage } from "@/lib/utils";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
+
+// Site key pública do Cloudflare Turnstile (não é segredo — é enviada ao
+// navegador por design). A verificação real do token acontece no servidor,
+// no Supabase Auth, usando a secret key configurada no Dashboard
+// (Authentication → Providers → Email → Enable CAPTCHA protection).
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
 
 const resetPasswordSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -41,7 +48,16 @@ const Auth: React.FC = () => {
   const [name, setName] = useState("");
   const [showOtpDialog, setShowOtpDialog] = useState(false);
   const [otpEmail, setOtpEmail] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
   const navigate = useNavigate();
+
+  // Turnstile tokens só podem ser usados uma vez — depois de qualquer
+  // tentativa (sucesso ou erro), força um novo desafio.
+  const resetCaptcha = () => {
+    setCaptchaToken(null);
+    setCaptchaResetKey((key) => key + 1);
+  };
 
   const resetPasswordForm = useForm<z.infer<typeof resetPasswordSchema>>({
     resolver: zodResolver(resetPasswordSchema),
@@ -67,6 +83,7 @@ const Auth: React.FC = () => {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
+          options: captchaToken ? { captchaToken } : undefined,
         });
 
         if (error) throw error;
@@ -104,6 +121,7 @@ const Auth: React.FC = () => {
             data: {
               name,
             },
+            ...(captchaToken ? { captchaToken } : {}),
           },
         });
 
@@ -126,6 +144,7 @@ const Auth: React.FC = () => {
       toast.error(`Erro: ${getErrorMessage(error) || "Ocorreu um erro"}`);
     } finally {
       setIsLoading(false);
+      resetCaptcha();
     }
   };
 
@@ -134,16 +153,18 @@ const Auth: React.FC = () => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
+        ...(captchaToken ? { captchaToken } : {}),
       });
 
       if (error) throw error;
-      
+
       toast.success("Instruções de redefinição de senha enviadas para seu email.");
       setMode(AuthMode.LOGIN);
     } catch (error: unknown) {
       toast.error(`Erro: ${getErrorMessage(error) || "Ocorreu um erro"}`);
     } finally {
       setIsLoading(false);
+      resetCaptcha();
     }
   };
 
@@ -264,17 +285,29 @@ const Auth: React.FC = () => {
                     variant="link"
                     className="p-0 text-sm"
                     type="button"
-                    onClick={() => setMode(AuthMode.FORGOT_PASSWORD)}
+                    onClick={() => {
+                      resetCaptcha();
+                      setMode(AuthMode.FORGOT_PASSWORD);
+                    }}
                   >
                     Esqueceu sua senha?
                   </Button>
                 </div>
               )}
 
+              {TURNSTILE_SITE_KEY && (
+                <TurnstileWidget
+                  siteKey={TURNSTILE_SITE_KEY}
+                  resetKey={captchaResetKey}
+                  onVerify={setCaptchaToken}
+                  onExpire={() => setCaptchaToken(null)}
+                />
+              )}
+
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading}
+                disabled={isLoading || (Boolean(TURNSTILE_SITE_KEY) && !captchaToken)}
               >
                 {isLoading
                   ? "Carregando..."
@@ -299,10 +332,18 @@ const Auth: React.FC = () => {
                     </FormItem>
                   )}
                 />
+                {TURNSTILE_SITE_KEY && (
+                  <TurnstileWidget
+                    siteKey={TURNSTILE_SITE_KEY}
+                    resetKey={captchaResetKey}
+                    onVerify={setCaptchaToken}
+                    onExpire={() => setCaptchaToken(null)}
+                  />
+                )}
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={isLoading}
+                  disabled={isLoading || (Boolean(TURNSTILE_SITE_KEY) && !captchaToken)}
                 >
                   {isLoading ? "Enviando..." : "Enviar instruções de recuperação"}
                 </Button>
@@ -315,7 +356,10 @@ const Auth: React.FC = () => {
           {mode === AuthMode.LOGIN ? (
             <Button
               variant="link"
-              onClick={() => setMode(AuthMode.SIGNUP)}
+              onClick={() => {
+                resetCaptcha();
+                setMode(AuthMode.SIGNUP);
+              }}
               className="text-sm"
               type="button"
             >
@@ -324,7 +368,10 @@ const Auth: React.FC = () => {
           ) : (
             <Button
               variant="link"
-              onClick={() => setMode(AuthMode.LOGIN)}
+              onClick={() => {
+                resetCaptcha();
+                setMode(AuthMode.LOGIN);
+              }}
               className="text-sm"
               type="button"
             >
