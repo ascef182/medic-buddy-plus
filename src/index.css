@@ -22,20 +22,20 @@
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
 
-  --color-primary: #4a89dc;
-  --color-primary-foreground: #ffffff;
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
 
-  --color-secondary: #48cfad;
-  --color-secondary-foreground: #ffffff;
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
 
-  --color-destructive: #ed5565;
-  --color-destructive-foreground: #ffffff;
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
 
-  --color-muted: #f5f7fa;
-  --color-muted-foreground: #656d78;
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
 
-  --color-accent: #5d9cec;
-  --color-accent-foreground: #ffffff;
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
 
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
@@ -183,7 +183,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-['Roboto',sans-serif] text-sm;
+    @apply bg-background text-foreground font-['Inter',sans-serif] text-sm;
   }
 
   h1, h2, h3, h4, h5, h6 {
